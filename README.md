@@ -200,7 +200,7 @@ See CONTRIBUTING.md for guidance.
 ---
 
 ## Standards alignment
-See [Standards Alignment](./STANDARDS_ALIGNMENT.md) for how this specification relates to W3C, MCP, A2A, ICO DUAA guidance, and the EU AI Act.
+See [Standards Alignment](STANDARDS_ALIGNMENT.md) for how this specification relates to W3C, MCP, A2A, ICO DUAA guidance, and the EU AI Act.
 
 ---
 
