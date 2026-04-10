@@ -225,4 +225,4 @@ This specification may be freely used, modified, and distributed. Commercial imp
 ---
 
 *LGT.io — vendor-neutral agentic governance for UK and EU enterprise*
-*lgt.io | [contact email]*
+*lgt.io | chris@lgt.io*
