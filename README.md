@@ -199,6 +199,11 @@ See CONTRIBUTING.md for guidance.
 
 ---
 
+## Standards alignment
+See [STANDARDS_ALIGNMENT.md](./STANDARDS_ALIGNMENT.md) for how this specification relates to W3C, MCP, A2A, ICO DUAA guidance, and the EU AI Act.
+
+---
+
 ## Intellectual foundations
 
 This specification draws on the following published work and practitioner insight:
