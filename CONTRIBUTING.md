@@ -102,7 +102,7 @@ We follow the Apache 2.0 licence for all contributions. By submitting a Pull Req
 
 The following areas are most urgently needed for the reference implementation milestone:
 
-- A working implementation of Layer 2 (decision context graph) using Corewood TETRA
+- A working implementation of Layer 2 (decision context graph) using any high-performance graph database — demonstrating the client-side persistent graph pattern with versioned, auditable decision traces
 - A purpose compatibility assessment function implementing the ICO's compatible reuse test
 - A minimal validator mesh implementation demonstrating asynchronous probabilistic consensus
 - did:wba integration with Layer 5 (immutable audit trail)
