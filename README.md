@@ -195,7 +195,7 @@ Contributions are particularly welcome in the following areas:
 - Reference implementations of individual layers
 - Test cases and validation scenarios
 
-See CONTRIBUTING.md for guidance.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance.
 
 ---
 
