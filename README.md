@@ -182,6 +182,9 @@ Tooling for purpose compatibility assessment and legitimate interests balancing,
 **v1.0 (target: August 2026) — EU AI Act readiness**
 Full compliance mapping and audit export capability aligned with EU AI Act enforcement requirements.
 
+## Open problems
+See [OPEN_PROBLEMS.md](OPEN_PROBLEMS.md) for known gaps in the specification where contribution is most urgently needed.
+
 ---
 
 ## Contributing
