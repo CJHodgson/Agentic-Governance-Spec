@@ -14,11 +14,24 @@ These are named as open problems rather than deferred features. They are structu
 
 **Why the five-layer architecture is insufficient here:** The immutable audit trail (Layer 5) records what happened and proves it occurred. The validator mesh (Layer 3) authorised the action under the governance rules of the originating domain. Neither makes the act self-validating in a receiving domain that has its own regulatory context, its own legitimate interests test, and its own interpretation of compatible reuse under the DUAA.
 
-**The direction this specification is exploring:** W3C Verifiable Credentials may provide the answer — a cryptographically signed artifact issued at the point of authorisation that carries the purpose compatibility assessment, confidence classification, and reversibility score as portable, independently verifiable claims. The receiving domain verifies the credential against the issuing authority's signature without needing to contact the issuer or reconstruct the original decision. This would constitute a sixth component of the governance architecture — a portable lawful commitment artifact that sits above the five layers and binds them into a form that survives domain crossing.
+**A critical refinement — portable explanation versus portable act:**
 
-**What is needed:** Practical implementation experience of cross-domain governance scenarios. Legal analysis of whether a W3C Verifiable Credential carrying a DUAA purpose compatibility assessment would satisfy the ICO's accountability requirements in the receiving domain. Reference to any existing work on verifiable credentials in regulated data exchange contexts.
+A cryptographically signed artifact carrying the authorisation, purpose compatibility assessment, and confidence classification — such as a W3C Verifiable Credential — is a major step forward. But it remains, in precise terms, an evidence-bearing object. The receiving domain verifies the signature, reads the claims, and then decides whether to rely on them. There is still a moment of interpretation. The act is defensible; it is not yet standing.
 
-*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026.*
+What is needed is a distinction between:
+
+- A **portable explanation** — an artifact that carries the evidence of why the act was valid, which the receiving domain evaluates and chooses to accept. W3C Verifiable Credentials achieve this.
+- A **portable act** — a commitment that the next domain encounters as already standing, without reopening the prior authorisation. The act itself is the primary object of reliance, not the evidence about the act.
+
+This distinction is not merely technical. In the physical world, certain classes of legal instrument — notarised documents, court orders, registered titles — achieve the status of portable acts because a legal framework designates them as primary objects of reliance. You cannot reopen a registered title by arguing that the original transfer should not have been lawful. The act stands.
+
+For agentic AI systems, achieving equivalent status requires two things: a technical primitive that carries the commitment in verifiable form, and a regulatory framework that designates certain classes of governance decision as primary objects of reliance. The former can be specified now. The latter does not yet exist in DUAA or EU AI Act. Neither statute creates a category of governance decision that is treated as already settled and not subject to reopening by a downstream domain.
+
+**The direction this specification is exploring:** W3C Verifiable Credentials provide the technical primitive for portable explanation. The specification will define what a portable lawful commitment artifact looks like technically — what claims it must carry, how it is signed, how it is verified — while explicitly noting that its status as a portable act requires regulatory recognition that is currently absent. This positions the specification ahead of the regulatory curve: defining the architecture that a future recognition framework will need to accommodate.
+
+**What is needed:** Legal analysis of what regulatory recognition would need to exist — in ICO guidance, FCA rules, or primary legislation — for a governance credential to constitute a primary object of reliance rather than portable evidence. Practical implementation experience of cross-domain scenarios where the distinction between portable explanation and portable act creates material compliance risk. Reference to any existing work on legally binding digital commitments in regulated data exchange contexts.
+
+*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The portable explanation versus portable act distinction is Peter's formulation and is reproduced here with his permission.*
 
 ---
 
