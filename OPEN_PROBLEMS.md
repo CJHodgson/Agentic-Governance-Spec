@@ -14,24 +14,84 @@ These are named as open problems rather than deferred features. They are structu
 
 **Why the five-layer architecture is insufficient here:** The immutable audit trail (Layer 5) records what happened and proves it occurred. The validator mesh (Layer 3) authorised the action under the governance rules of the originating domain. Neither makes the act self-validating in a receiving domain that has its own regulatory context, its own legitimate interests test, and its own interpretation of compatible reuse under the DUAA.
 
-**A critical refinement — portable explanation versus portable act:**
+---
+
+### The two-primitive framework
+
+Subsequent work by Peter Cranstone (3PMobile, April 2026) has identified the structural reason the five-layer architecture is insufficient here, and has defined two primitives that any solution must provide. This framework is incorporated into the specification with Peter's permission and is reproduced here in the terms he has established.
+
+**The formation problem and the reliance problem are sequential constraints, not the same problem.**
+
+Most governance architectures — including this one at v0.1 — address formation: ensuring that when an agent acts, the decision is explicit, bounded, measurable, auditable, and certifiable. This is necessary. It is not sufficient.
+
+A certified decision is not automatically a reliable unit of action. When a certified decision crosses into a new domain — institutional, jurisdictional, or operational — one of three things typically occurs:
+
+- **Reinterpretation** — the receiving system evaluates the prior decision under its own policies and assumptions
+- **Reconstruction** — the receiving system replays the underlying evidence and re-derives the decision
+- **Revalidation** — the receiving system requests fresh inputs or new certification before proceeding
+
+In each case, the original decision has not survived intact. The system has not produced a unit that can be accepted as-is. This is the **reconstruction pattern**: Decision → Record → Re-evaluation. It creates real cost and real exposure — re-evaluation cost, delay, duplicated control activity, fragmented accountability, additional liability surface, and weaker institutional confidence in automation. This is the **reconstruction tax**: the repeated need to rebuild confidence in a prior act because the system never produced a dependable unit in the first place.
+
+---
+
+### The two primitives
+
+**Primitive 1 — The human-resolution event (formation)**
+
+The first primitive is the bounded point at which machine ambiguity is resolved by a human contribution that is: specific rather than open-ended; measurable rather than impressionistic; liability-bearing rather than merely advisory; comparable across like cases; and certifiable as part of the system.
+
+This primitive solves the formation problem. It turns the human contribution from a procedural exception into a certifiable event. The current specification defines an escalation path in the validator mesh (Layer 3) for low-confidence decisions but does not yet define the human-resolution event as a first-class primitive with the properties above. This is a gap that v0.2 must address.
+
+**Primitive 2 — The reliance-ready unit (reliance)**
+
+The second primitive is the output condition that must be satisfied if a certified decision is to remain usable beyond its point of origin. A reliance-ready unit is not merely well-documented, replayable, or explainable. It is one that does not require fresh interpretation of the prior act simply to be accepted in the next relying domain.
+
+The decisive structural moment is the **reliance boundary** — the point at which a prior act must transition from being locally valid to being externally usable. It is the moment where a system must decide whether it can act without reopening the prior act. This is distinct from formation, validation, audit, and policy compliance. It is where many systems break. They produce decisions, but not units that hold.
+
+The central distinction, in Peter's formulation:
+
+> **decision ≠ standing**
+
+Certification produces decision quality but not decision persistence. A decision may be correct, justified, documented, signed, and auditable — and still fail as soon as it crosses into another domain that must reinterpret it before acting.
+
+---
+
+### The portable explanation versus portable act distinction
 
 A cryptographically signed artifact carrying the authorisation, purpose compatibility assessment, and confidence classification — such as a W3C Verifiable Credential — is a major step forward. But it remains, in precise terms, an evidence-bearing object. The receiving domain verifies the signature, reads the claims, and then decides whether to rely on them. There is still a moment of interpretation. The act is defensible; it is not yet standing.
+
+In Peter's formulation, reproduced with permission:
+
+> "A cryptographically signed artifact carrying authorisation, purpose compatibility, and confidence is a major step forward — but it may still be an evidence-bearing object unless lawful commitment itself becomes the primary object of reliance. Not just a portable explanation of why the act should be trusted, but what must exist such that the act can be encountered as already standing."
+
+This introduces a second failure mode: a decision can be valid at the point of binding and still fail once it crosses into another domain, because it degrades into something that must be re-evaluated rather than relied upon.
 
 What is needed is a distinction between:
 
 - A **portable explanation** — an artifact that carries the evidence of why the act was valid, which the receiving domain evaluates and chooses to accept. W3C Verifiable Credentials achieve this.
 - A **portable act** — a commitment that the next domain encounters as already standing, without reopening the prior authorisation. The act itself is the primary object of reliance, not the evidence about the act.
 
-This distinction is not merely technical. In the physical world, certain classes of legal instrument — notarised documents, court orders, registered titles — achieve the status of portable acts because a legal framework designates them as primary objects of reliance. You cannot reopen a registered title by arguing that the original transfer should not have been lawful. The act stands.
+This distinction is not merely technical. In the physical world, certain classes of legal instrument — notarised documents, court orders, registered titles — achieve the status of portable acts because a legal framework designates them as primary objects of reliance. For agentic AI systems, achieving equivalent status requires two things: a technical primitive that carries the commitment in verifiable form, and a regulatory framework that designates certain classes of governance decision as primary objects of reliance. The former can be specified now. The latter does not yet exist in DUAA or EU AI Act.
 
-For agentic AI systems, achieving equivalent status requires two things: a technical primitive that carries the commitment in verifiable form, and a regulatory framework that designates certain classes of governance decision as primary objects of reliance. The former can be specified now. The latter does not yet exist in DUAA or EU AI Act. Neither statute creates a category of governance decision that is treated as already settled and not subject to reopening by a downstream domain.
+---
 
-**The direction this specification is exploring:** W3C Verifiable Credentials provide the technical primitive for portable explanation. The specification will define what a portable lawful commitment artifact looks like technically — what claims it must carry, how it is signed, how it is verified — while explicitly noting that its status as a portable act requires regulatory recognition that is currently absent. This positions the specification ahead of the regulatory curve: defining the architecture that a future recognition framework will need to accommodate.
+### What this means for the specification
 
-**What is needed:** Legal analysis of what regulatory recognition would need to exist — in ICO guidance, FCA rules, or primary legislation — for a governance credential to constitute a primary object of reliance rather than portable evidence. Practical implementation experience of cross-domain scenarios where the distinction between portable explanation and portable act creates material compliance risk. Reference to any existing work on legally binding digital commitments in regulated data exchange contexts.
+The five-layer architecture as specified addresses formation adequately at v0.1. It does not yet address reliance. Closing this gap requires:
 
-*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The portable explanation versus portable act distinction is Peter's formulation and is reproduced here with his permission.*
+1. Defining the human-resolution event as a first-class primitive in the validator mesh escalation path (Layer 3) — with the properties of being specific, measurable, liability-bearing, comparable, and certifiable.
+
+2. Defining the reliance-ready unit as an output condition of the governance layer — not a technical container but a set of properties the output must satisfy for it to be accepted without reconstruction in a receiving domain.
+
+3. Defining the reliance boundary as a formal concept in the architecture — the structural moment where local validity must become external usability, and where the governance layer must produce a portable act rather than portable evidence.
+
+4. Identifying what regulatory recognition would need to exist — in ICO guidance, FCA rules, or primary legislation — for a governance output to constitute a primary object of reliance rather than portable evidence.
+
+**What is needed:** Legal analysis of the regulatory recognition gap. Practical implementation experience of cross-domain scenarios where the reconstruction tax is measurable. Reference to existing work on legally binding digital commitments in regulated data exchange contexts. Contributions to the formal definition of the human-resolution event and reliance-ready unit as implementable primitives.
+
+---
+
+*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The two-primitive framework — formation primitive and reliance-ready unit — the reconstruction tax concept, the reliance boundary, and the portable explanation versus portable act distinction are Peter's formulations, developed in parallel with this specification and incorporated here with his permission.*
 
 ---
 
