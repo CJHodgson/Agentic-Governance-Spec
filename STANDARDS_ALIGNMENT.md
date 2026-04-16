@@ -91,9 +91,11 @@ The ICO's April 2026 guidance on recognised legitimate interest and purpose limi
 
 ## EU AI Act
 
-**Enforcement:** August 2, 2026 (high-risk AI systems)
+**Enforcement:** December 2027 (high-risk AI systems) — updated from August 2026 under the Digital Omnibus package agreed March 2026. AI embedded in medical devices: August 2028.
 **Reference:** https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689
 
-The EU AI Act's requirements for high-risk AI systems — human oversight, automated audit trails, documented governance processes, incident reporting — are the primary regulatory driver for Layers 3, 4, and 5 of this specification. The compliance mapping table in the main README shows explicitly which layer satisfies which requirement.
+**Article 111 — non-retroactivity:** High-risk AI systems placed on the market before the enforcement deadline are exempt from the Act unless substantially modified afterward. This creates a two-tier market. Organisations that build governance-first are competing against those who shipped before the deadline under different rules. This specification is designed for the former — for whom the deadline is not an exit but a destination.
+
+The EU AI Act's requirements for high-risk AI systems — human oversight, automated audit trails, documented governance processes, incident reporting — remain the medium-term regulatory driver for Layers 3, 4, and 5 of this specification. The compliance mapping table in the main README shows explicitly which layer satisfies which requirement.
 
 Organisations deploying agents in regulated sectors (financial services, healthcare, critical infrastructure, employment) should treat this specification as a component of their EU AI Act compliance programme, not a substitute for it. Legal review of the specific risk classification of their agent deployment is required separately.
