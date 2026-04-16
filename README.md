@@ -1,8 +1,8 @@
-# Agentic-Governance-Spec
-Vendor-neutral open specification for governing AI agents across heterogeneous enterprise estates. Defines five architectural layers for DUAA and EU AI Act compliance — including reversibility scoring, purpose compatibility assessment, and immutable audit trails.
 # Agentic Governance Layer — Open Specification
 
 **A vendor-neutral governance architecture for AI agent systems operating under the UK Data (Use and Access) Act 2025, UK GDPR, and EU AI Act.**
+
+> **Regulatory note (updated April 2026):** The EU AI Act high-risk enforcement deadline has moved to December 2027 under the Digital Omnibus package. The DUAA is already in force. This specification treats the DUAA as the primary near-term regulatory driver and the EU AI Act as the medium-term destination. See the roadmap section for implications.
 
 Status: Open specification — v0.1 draft, April 2026
 Maintainer: LGT.io
@@ -21,7 +21,7 @@ Agentic AI systems break this model fundamentally. An agent does not have a fixe
 
 The DUAA's shift from "prove you are permitted" to "acceptable unless proven harmful" sounds like it creates headroom. In practice, for agentic systems, it creates silent compounding liability. The moment an agent chain produces a harmful outcome, the organisation must demonstrate retroactively that every data reuse across every agent hop was compatible with the original collection purpose. In most current deployments, that demonstration is impossible.
 
-The EU AI Act makes the problem acute. From August 2026, high-risk AI systems must have automated audit trails, documented governance processes, and incident reporting capabilities. Penalties reach 3% of global annual revenue. The Act does not define what governance looks like for agentic systems. It defines the outcome that governance must achieve: demonstrable human oversight, traceable decision rationale, and the ability to intervene.
+The EU AI Act remains a significant governance driver, though its enforcement timeline has shifted. Under the Digital Omnibus package agreed by Parliament and Council in March 2026, the high-risk AI system deadline moved from August 2026 to December 2027, with AI embedded in medical devices moving to August 2028. This is not straightforward breathing room. Article 111's non-retroactivity clause means any high-risk AI system placed on the market before the deadline is exempt from the Act unless substantially modified afterward — creating a two-tier market in which organisations that deployed governance-first face competitors who did not, now operating under different rules indefinitely. The Act's requirements remain the destination: automated audit trails, documented governance processes, incident reporting, penalties up to 3% of global annual revenue. The deadline has moved. The architecture has not.
 
 Every major platform vendor — ServiceNow, Salesforce, AWS, Microsoft, Oracle, IBM — has built governance tooling that addresses this from within their own platform boundaries. None provides a vendor-neutral layer that operates across heterogeneous legacy estates, scores action reversibility before execution, or maintains the cross-era system contract awareness that heterogeneous deployments require.
 
@@ -176,14 +176,11 @@ This document. Defines the five layers and their required interfaces. Does not s
 **v0.2 (target: June 2026) — Reference implementation**
 A minimal working implementation of all five layers against a defined test environment, using Corewood TETRA as the decision context graph and a configurable validator mesh.
 
-**v0.3 (target: July 2026) — DUAA compliance toolkit**
-Tooling for purpose compatibility assessment and legitimate interests balancing, aligned with ICO guidance published under the DUAA.
+**v0.3 (target: September 2026) — DUAA compliance toolkit**
+Tooling for purpose compatibility assessment and legitimate interests balancing, aligned with ICO guidance published under the DUAA. The DUAA is already in force and is the primary regulatory driver for UK deployments.
 
-**v1.0 (target: August 2026) — EU AI Act readiness**
-Full compliance mapping and audit export capability aligned with EU AI Act enforcement requirements.
-
-## Open problems
-See [OPEN_PROBLEMS.md](OPEN_PROBLEMS.md) for known gaps in the specification where contribution is most urgently needed.
+**v1.0 (target: mid-2027) — EU AI Act readiness**
+Full compliance mapping and audit export capability aligned with EU AI Act enforcement requirements. Note: following the Digital Omnibus package (March 2026), the high-risk AI system deadline moved to December 2027. Article 111's non-retroactivity clause means systems placed on market before that date are exempt unless substantially modified. This specification is designed for organisations building governance-first — for whom the deadline is not an escape route but a destination.
 
 ---
 
@@ -198,12 +195,7 @@ Contributions are particularly welcome in the following areas:
 - Reference implementations of individual layers
 - Test cases and validation scenarios
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidance.
-
----
-
-## Standards alignment
-See [STANDARDS_ALIGNMENT.md](STANDARDS_ALIGNMENT.md) how this specification relates to W3C, MCP, A2A, ICO DUAA guidance, and the EU AI Act.
+See CONTRIBUTING.md for guidance.
 
 ---
 
