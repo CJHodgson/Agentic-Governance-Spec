@@ -87,11 +87,23 @@ The five-layer architecture as specified addresses formation adequately at v0.1.
 
 4. Identifying what regulatory recognition would need to exist — in ICO guidance, FCA rules, or primary legislation — for a governance output to constitute a primary object of reliance rather than portable evidence.
 
-**What is needed:** Legal analysis of the regulatory recognition gap. Practical implementation experience of cross-domain scenarios where the reconstruction tax is measurable. Reference to existing work on legally binding digital commitments in regulated data exchange contexts. Contributions to the formal definition of the human-resolution event and reliance-ready unit as implementable primitives.
+### The cross-tier interaction problem — a regulatory instantiation of the reliance boundary
+
+The Digital Omnibus package (March 2026) has created a specific and immediate version of this problem that does not require theoretical future scenarios to illustrate. The EU AI Act's Article 111 non-retroactivity clause creates a two-tier market: Tier 1 systems built governance-first, and Tier 2 systems deployed before December 2027 that are permanently exempt unless substantially modified.
+
+Agents do not respect regulatory tiers. A Tier 1 governed system will receive actions from Tier 2 ungoverned systems. Those actions arrive without a certifiable formation event, without a reliance-ready output, without a dependable unit. The Tier 1 system sits at exactly the reliance boundary described above — but the ungoverned domain on the other side is not a failure of design. It is a feature of the regulatory framework.
+
+The reconstruction tax therefore falls structurally and permanently on compliant organisations. Every incoming action from a Tier 2 system must be treated as unverified at the point of receipt — assessed for purpose compatibility, assigned a confidence threshold based on reversibility, and either accepted, escalated, or blocked. This is not a v1.0 capability. It is a Day 1 requirement for any Tier 1 enterprise operating in a mixed environment — which is every enterprise, because the two-tier market guarantees mixed environments for at least the next twenty-four months.
+
+The governance layer's purpose compatibility gate (Layer 3) and system contract registry (Layer 4) are the defensive perimeter at this reliance boundary. Their design must account for the reality that a significant proportion of incoming actions will originate from systems that were never required to produce dependable units — not because of technical failure, but because the regulatory framework made that a viable strategy.
+
+The EU AI Act delay was intended to reduce governance urgency. The cross-tier interaction problem reverses that logic entirely for Tier 1 enterprises. The delay does not reduce the need for a governance layer. It makes the governance layer the only mechanism by which a compliant organisation can protect itself from the reconstruction tax imposed on it by the non-compliance of others.
+
+**What is needed:** Specification of how the Layer 3 purpose compatibility gate should handle incoming actions from unverified or ungoverned domains — including what confidence threshold applies, what escalation path is triggered, and how the decision is recorded in the audit trail. Legal analysis of whether a Tier 1 organisation bears liability for outcomes that originate in Tier 2 ungoverned agent actions received across a domain boundary. Practical implementation experience of cross-tier scenarios where the reconstruction tax is measurable.
 
 ---
 
-*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The two-primitive framework — formation primitive and reliance-ready unit — the reconstruction tax concept, the reliance boundary, and the portable explanation versus portable act distinction are Peter's formulations, developed in parallel with this specification and incorporated here with his permission.*
+*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The two-primitive framework — formation primitive and reliance-ready unit — the reconstruction tax concept, the reliance boundary, and the portable explanation versus portable act distinction are Peter's formulations, developed in parallel with this specification and incorporated here with his permission. The cross-tier interaction problem as a regulatory instantiation of the reliance boundary was identified by CJ Hodgson, LGT.io, April 2026.*
 
 ---
 
