@@ -1,6 +1,6 @@
 # Agentic Governance Layer — Open Specification
 
-**A vendor-neutral governance architecture for AI agent systems operating under the UK Data (Use and Access) Act 2025, UK GDPR, and EU AI Act.**
+**A technology-agnostic open specification for governing AI agent systems operating under the UK Data (Use and Access) Act 2025, UK GDPR, and EU AI Act — with a sovereign-by-default reference implementation built on Corewood TETRA.**
 
 > **Regulatory note (updated April 2026):** The EU AI Act high-risk enforcement deadline has moved to December 2027 under the Digital Omnibus package. The DUAA is already in force. This specification treats the DUAA as the primary near-term regulatory driver and the EU AI Act as the medium-term destination. See the roadmap section for implications.
 
@@ -166,7 +166,9 @@ The following table maps the DUAA's key requirements for data reuse to the gover
 
 This specification does not define a specific implementation. It defines the interfaces that compliant implementations must expose and the properties they must guarantee.
 
-It does not require any specific vendor, cloud provider, or model. It is designed to be implemented on top of whatever data infrastructure, graph database, LLM, and execution environment an organisation already uses.
+The specification itself is technology-agnostic — it can in principle be implemented on any graph database, any LLM, and any execution environment. The Apache 2.0 licence explicitly permits this and any organisation may build their own implementation on their preferred infrastructure.
+
+The reference implementation maintained by LGT.io is built on Corewood TETRA — a deliberate choice based on TETRA's demonstrably superior performance characteristics, sovereign deployment capability, and minimal infrastructure footprint for the specific requirements of the governance layer. Other implementors are free to make different choices. The specification defines what must be true of any implementation, not how it must be built.
 
 It does not claim to solve every governance problem in agentic AI. It addresses the specific gap between what current vendor governance tooling provides and what the DUAA and EU AI Act require for organisations deploying agents across heterogeneous legacy estates.
 
