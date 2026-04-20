@@ -211,7 +211,10 @@ See CONTRIBUTING.md for guidance.
 
 ---
 
-## Intellectual foundations
+See [ENDORSEMENTS.md](ENDORSEMENTS.md) for external contributions to this specification.## Intellectual foundations
+
+___
+
 
 This specification draws on the following published work and practitioner insight:
 
