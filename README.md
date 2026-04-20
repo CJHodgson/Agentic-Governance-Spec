@@ -125,10 +125,16 @@ The complete governance architecture for agentic systems comprises five componen
 
 **Why it matters for compliance:** The EU AI Act requires that audit trails be maintained in a form that cannot be retrospectively modified. The DUAA accountability principle requires that organisations be able to demonstrate how personal data was used. These requirements are only meaningful if the audit trail is genuinely tamper-evident — not just logged in a database that the organisation controls.
 
-**Design principle:** Cryptographic audit trails — the pattern demonstrated by the blockchain community through Merkle tree structures — provide tamper-evidence without requiring a distributed ledger. A hash chain of decision records, where each record includes the hash of the previous record, makes retrospective modification detectable. This is architecturally lighter than full blockchain deployment and compatible with enterprise latency requirements.
+**Design principle — hash chaining:** Cryptographic audit trails — the pattern demonstrated by the blockchain community through Merkle tree structures — provide tamper-evidence without requiring a distributed ledger. A hash chain of decision records, where each record includes the hash of the previous record, makes retrospective modification detectable. This is architecturally lighter than full blockchain deployment and compatible with enterprise latency requirements.
+
+**Alternative design principle — file-format-native tamper-evidence:** A substrate that provides per-section cryptographic integrity at the file format level — such that any modification of the file is detectable on read, as a native property of the format rather than a secondary audit layer — satisfies Layer 5 without requiring a separate append-only record. Where such a substrate is used, Layers 2 and 5 collapse into a single artifact: the decision context graph is simultaneously the tamper-evident audit trail, and verification of the file is simultaneously verification of the audit record.
+
+This is a stronger property than the hash-chaining pattern. It removes the architectural dependency between the decision context store and the audit log, eliminates the synchronisation problem between them, and makes the audit trail intrinsic to the governance artifact rather than dependent on a parallel system. Future revisions of this specification will consider whether the separation of Layers 2 and 5 reflects an architectural necessity or an accident of the specification's derivation from prior art in systems where file-format-native integrity was not available.
+
+*This architectural observation was first made in the context of this specification by Kyle Mickey, Corewood, in the TETRA technology review, April 2026.*
 
 **Interface this layer must expose:**
-- Append-only write: decision records written with cryptographic chaining
+- Append-only write: decision records written with cryptographic chaining (hash-chain pattern) or file-format-native integrity (collapsed Layer 2/5 pattern)
 - Verification API: confirm that a given record has not been modified since creation
 - Regulatory export: structured export of audit records in formats compatible with ICO and EU AI Act inspection requirements
 
@@ -212,7 +218,7 @@ This specification draws on the following published work and practitioner insigh
 - Ajit Jaokar, *Enterprise Context Graphs: Data and Decision as the Foundation for Institutional AI Agents*, Oxford University, March 2026 — foundational framework for the decision context layer
 - XBow practitioner insight on validator-gated execution and evidence trust over agent trust, 2026
 - Reuven Cohen, Cognitum — proof-gated execution architecture and hardware-level governance primitives
-- Corewood TETRA — high-performance graph database for low-latency agent context
+- Corewood TETRA and TETRAFILE — high-performance graph database and governance artifact substrate. Kyle Mickey, Corewood, contributed the TETRA technology review (April 2026) identifying the TETRA/TETRAFILE architectural distinction, the Layer 2/5 collapse property, TETRAFILE multi-recipient addressability as the candidate portable lawful commitment primitive, and post-quantum forward-security as a specification-level substrate recommendation. These contributions materially advanced the specification.
 - Lorenzo Moriondo, tuned.org.uk — embeddings, vector retrieval, and evidence infrastructure research
 - ICO guidance on DUAA purpose limitation and legitimate interests, April 2026
 - Anthropic Project Glasswing announcement, April 2026 — industry validation of the capability threshold and governance urgency
