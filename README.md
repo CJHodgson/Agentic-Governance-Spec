@@ -11,6 +11,22 @@ Licence: Apache 2.0
 
 ---
 
+## What this is — thirty second read
+
+This specification defines a **governance layer for autonomous AI agents** — the component that sits between an agent and the systems it acts on, and decides whether the agent is permitted to proceed.
+
+When an agent is about to take an action — write a record, send a communication, execute a transaction, modify a system — the governance layer intercepts it before it happens. It checks whether the action is compatible with the purpose for which the underlying data was collected. It scores how reversible the action is. It authorises low-risk actions automatically, escalates ambiguous ones to a human, and blocks actions that exceed the confidence threshold for the risk involved. It records every decision — what the agent proposed, what evidence supported it, what was authorised or blocked, and why — in a tamper-evident audit trail.
+
+**The business case is straightforward.** Enterprises that deploy AI agents without this layer are accumulating silent liability — actions taken on data that cannot be justified under current UK law, audit trails that do not exist or cannot be trusted, and no mechanism to demonstrate human oversight when regulators or customers ask for it. The governance layer turns agent deployment from a legal liability into a defensible, auditable, commercially viable operation.
+
+**What it is not.** This is not a model safety layer. It does not evaluate whether an AI model is aligned or safe in general — that is a different and prior problem. It governs what a deployed agent is permitted to do in a specific operational context, against specific systems, with specific data. It operates at runtime, not at training time.
+
+**Relationship to other frameworks.** Microsoft's Agent Governance Toolkit (April 2026) addresses runtime security — policy enforcement, zero-trust identity, OWASP Agentic Top 10 risks. That toolkit and this specification are complementary: Microsoft's toolkit asks "is this action permitted under our security policies?" This specification asks "is this action lawful under UK and EU data regulation, and can we prove it?" An enterprise deploying agents in regulated UK or EU environments needs both.
+
+*If you want the full technical architecture, compliance mappings, and open problems, continue reading. If you want to contribute or evaluate this for implementation, see CONTRIBUTING.md.*
+
+---
+
 ## Why this exists
 
 Enterprises deploying AI agents in the UK and EU face a specific and underappreciated problem.
@@ -211,10 +227,7 @@ See CONTRIBUTING.md for guidance.
 
 ---
 
-See [ENDORSEMENTS.md](ENDORSEMENTS.md) for external contributions to this specification.## Intellectual foundations
-
-___
-
+## Intellectual foundations
 
 This specification draws on the following published work and practitioner insight:
 
