@@ -105,9 +105,55 @@ The EU AI Act delay was intended to reduce governance urgency. The cross-tier in
 
 This does not resolve the regulatory recognition problem. A technical primitive for a portable act does not by itself make that act a primary object of reliance under DUAA or EU AI Act. The remaining work on Open Problem 1 is therefore regulatory rather than architectural. The technical primitive the problem identified as missing now exists in the substrate.
 
+**Further refinement — the antecedent authority test (Peter Cranstone, April 2026):**
+
+Subsequent discussion has sharpened the problem to a more precise formulation. TETRAFILE's technical properties make it the strongest available carrier of a governance commitment, but the question of whether it constitutes a portable act rather than portable evidence depends on a test that is prior to technical capability.
+
+The test is: *does antecedent authority still exist as the operative basis that gives the artifact its force?*
+
+If the force of the artifact still derives from pointing back to a prior authorising act — the validator mesh decision, the purpose compatibility assessment, the human-resolution event — then however sophisticated the carrier, it remains a technically superior evidentiary object. The prior act is still doing the legal work.
+
+A portable act in the strong sense requires that antecedent authority has been exhausted at the decisive boundary such that the artifact itself becomes the sole surviving basis for reliance. Nothing upstream remains live. The object presented is non-referential — it no longer derives its force from what came before.
+
+**The decision context graph and the shared reality framing:**
+
+This distinction maps cleanly onto the architecture of the governance layer. The decision context graph (Layer 2) is not a sequential log. It is a complete relational map of all relevant context — every prior decision, its evidence, its outcomes, and its relationships — held simultaneously and queryable against any proposed action. The validator mesh collapses this superposition of context to a confidence-weighted authorisation at the moment of action.
+
+In this framing, the antecedent authority question becomes concrete rather than abstract. Antecedent authority ceases to be a live operative basis at exactly the moment when the receiving domain accepts the shared governance context — when it participates in the same framework of decisions, relationships, and authorisations that the graph represents. The artifact stands not because it has achieved philosophical self-sufficiency but because both domains are operating within a shared reality in which the prior act has meaning.
+
+The moment at which Open Problem 1 becomes practically acute is the moment a receiving domain refuses that shared context — when it says, in effect, "we have no desire to play a part in your reality." In a governance framework where all participating domains accept the context as operative, antecedent authority is effectively exhausted by common consent. The problem surfaces only at the boundary of that agreement.
+
+Only outcomes that actually manifest matter if any purpose is to be attributed. A governance decision that a receiving domain refuses to recognise does not manifest in that domain, regardless of how technically superior the artifact is.
+
+**Precedents where antecedent authority has been exhausted:**
+
+Three domains have solved versions of this problem. Each required both a technical mechanism and a normative framework — neither alone was sufficient.
+
+*English land registration:* Under the Land Registration Act 2002, a register entry is not evidence of title — it is title. The antecedent transaction history is exhausted. A subsequent purchaser does not investigate whether the original conveyance was valid. The statute designates registration as the source of authority, not merely its record.
+
+*International arbitral awards:* Under the New York Convention (1958), an arbitral award must be recognised by signatory states without re-examination of the merits. The antecedent authority of the tribunal and the validity of the proceedings are presumed exhausted. The award is a primary object of reliance across jurisdictions. Refusal is possible only on narrow, defined grounds.
+
+*Blockchain transaction finality:* A Bitcoin transaction buried under sufficient proof-of-work achieves antecedent authority exhaustion for the narrow question of whether the transaction occurred and in what order. The prior act — the signing — becomes irrelevant once the chain is long enough. The chain itself is the authority. This is limited to transaction ordering and does not carry purpose or legal standing, but the mechanism is analogous.
+
+In every case, the pattern is the same: a technical mechanism that produces a self-validating artifact, plus a normative framework that designates the artifact as the source of authority. Neither element alone achieves it. The normative framework is what exhausts antecedent authority by common consent of the participating domains.
+
+**The practical minimum burden for this specification:**
+
+For most enterprise deployments in a single regulatory jurisdiction — a UK enterprise deploying agents under DUAA, a financial services firm operating within FCA and ICO oversight — all participating domains already share regulatory context. Antecedent authority is effectively exhausted by the shared framework. The governance layer produces decisions that all domains accept as valid without re-examination. Open Problem 1 does not arise in practice.
+
+The problem surfaces at the boundary of shared context: cross-jurisdictional deployments, adversarial or uncooperative receiving domains, long-lived commitments that outlast the regulatory framework in which they were formed. For these cases, the remaining work is the normative equivalent of the New York Convention — a framework that designates certain classes of governance decision as presumptively valid across domains, rebuttable only on narrow defined grounds.
+
+This is a tractable policy objective. The precedents show it has been achieved before. The technical primitive — TETRAFILE — provides the mechanism. The open question is which policy body, regulatory framework, or international agreement creates the normative designation.
+
+**What this means for practitioners:**
+
+For a team like Landbay's deploying AI agents in UK mortgage lending, or a wealth management firm deploying agents across an adviser network operating under consistent FCA oversight, the antecedent authority question does not arise in practice. All participants share the governance context. The architecture as specified — confidence-weighted authorisation, human-resolution events at appropriate thresholds, TETRAFILE artifact — is sufficient to produce decisions that hold across the deployment.
+
+For deployments that cross jurisdictions, involve domains operating under different regulatory frameworks, or require governance decisions to hold over multi-decade commitment lifetimes, this distinction becomes material and the normative framework question becomes urgent.
+
 ---
 
-*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The two-primitive framework — formation primitive and reliance-ready unit — the reconstruction tax concept, the reliance boundary, and the portable explanation versus portable act distinction are Peter's formulations, developed in parallel with this specification and incorporated here with his permission. The cross-tier interaction problem as a regulatory instantiation of the reliance boundary was identified by CJ Hodgson, LGT.io, April 2026. The identification of TETRAFILE multi-recipient cryptographic addressability as the candidate technical primitive for the portable lawful commitment artifact was made by Kyle Mickey, Corewood, in the TETRA technology review, April 2026.*
+*This problem was first articulated in the context of this specification by Peter Cranstone, 3PMobile, April 2026. The two-primitive framework — formation primitive and reliance-ready unit — the reconstruction tax concept, the reliance boundary, the portable explanation versus portable act distinction, and the antecedent authority test are Peter's formulations, developed in parallel with this specification and incorporated here with his permission. The cross-tier interaction problem as a regulatory instantiation of the reliance boundary was identified by CJ Hodgson, LGT.io, April 2026. The identification of TETRAFILE multi-recipient cryptographic addressability as the candidate technical primitive for the portable lawful commitment artifact was made by Kyle Mickey, Corewood, in the TETRA technology review, April 2026. The decision context graph as superposition of relevant context collapsed to a confidence-weighted decision at the moment of action, and the shared reality framing of antecedent authority exhaustion, were formulated by CJ Hodgson, LGT.io, April 2026.*
 
 ---
 
