@@ -98,18 +98,19 @@ We follow the Apache 2.0 licence for all contributions. By submitting a Pull Req
 
 ---
 
-## Current priorities for v0.2 (target: June 2026)
+## Current priorities for v0.2 (target: September 2026)
 
 The following areas are most urgently needed for the reference implementation milestone:
 
-- A working implementation of Layer 2 (decision context graph) using any high-performance graph database — demonstrating the client-side persistent graph pattern with versioned, auditable decision traces
+- A working implementation of Layer 2 (decision context graph) demonstrating the client-side persistent graph pattern with versioned, auditable decision traces — the LGT.io reference implementation (truc, github.com/lgt-io/truc) is the primary vehicle for this work
 - A purpose compatibility assessment function implementing the ICO's compatible reuse test
-- A minimal validator mesh implementation demonstrating asynchronous probabilistic consensus
+- A minimal validator mesh implementation demonstrating deterministic graph-operation-based governance evaluation as an alternative to LLM-verifying-LLM
 - did:wba integration with Layer 5 (immutable audit trail)
+- The human-resolution event as a first-class primitive in the Layer 3 escalation path (see Open Problem 1)
 
 If you are working on any of these, please open an Issue to coordinate and avoid duplicating effort.
 
 ---
 
-*LGT.io — vendor-neutral agentic governance for UK and EU enterprise*
+*LGT.io — sovereignty-native agentic governance for UK and EU enterprise*
 *Maintained by CJ Hodgson | chris@lgt.io*

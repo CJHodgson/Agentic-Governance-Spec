@@ -1,6 +1,6 @@
 # Agentic Governance Layer — Open Specification
 
-**A technology-agnostic open specification for governing AI agent systems operating under the UK Data (Use and Access) Act 2025, UK GDPR, and EU AI Act — with a sovereign-by-default reference implementation built on Corewood TETRA.**
+**A technology-agnostic open specification for governing AI agent systems operating under the UK Data (Use and Access) Act 2025, UK GDPR, and EU AI Act — with a sovereignty-native reference implementation.**
 
 > **Regulatory note (updated April 2026):** The EU AI Act high-risk enforcement deadline has moved to December 2027 under the Digital Omnibus package. The DUAA is already in force. This specification treats the DUAA as the primary near-term regulatory driver and the EU AI Act as the medium-term destination. See the roadmap section for implications.
 
@@ -21,7 +21,7 @@ When an agent is about to take an action — write a record, send a communicatio
 
 **What it is not.** This is not a model safety layer. It does not evaluate whether an AI model is aligned or safe in general — that is a different and prior problem. It governs what a deployed agent is permitted to do in a specific operational context, against specific systems, with specific data. It operates at runtime, not at training time.
 
-**Relationship to other frameworks.** Microsoft's Agent Governance Toolkit (April 2026) addresses runtime security — policy enforcement, zero-trust identity, OWASP Agentic Top 10 risks. That toolkit and this specification are complementary: Microsoft's toolkit asks "is this action permitted under our security policies?" This specification asks "is this action lawful under UK and EU data regulation, and can we prove it?" An enterprise deploying agents in regulated UK or EU environments needs both.
+**Relationship to other frameworks.** Microsoft's Agent Governance Toolkit (2026) addresses runtime security — policy enforcement, zero-trust identity, OWASP Agentic Top 10 risks. That toolkit and this specification are complementary: Microsoft's toolkit asks "is this action permitted under our security policies?" This specification asks "is this action lawful under UK and EU data regulation, and can we prove it?" An enterprise deploying agents in regulated UK or EU environments needs both. Critically, Microsoft's toolkit does not address the sovereignty requirements that UK and EU regulated enterprise procurement now demands — see the sovereignty constraint below.
 
 *If you want the full technical architecture, compliance mappings, and open problems, continue reading. If you want to contribute or evaluate this for implementation, see CONTRIBUTING.md.*
 
@@ -31,7 +31,7 @@ When an agent is about to take an action — write a record, send a communicatio
 
 Enterprises deploying AI agents in the UK and EU face a specific and underappreciated problem.
 
-The regulatory frameworks that govern data use and AI systems — the UK Data (Use and Access) Act 2025 (DUAA), UK GDPR, and the EU AI Act (full enforcement from August 2026) — were designed with deterministic software in mind. A system with a fixed purpose, a defined input, a predictable output. Compliance was a matter of documenting what the system did and why.
+The regulatory frameworks that govern data use and AI systems — the UK Data (Use and Access) Act 2025 (DUAA), UK GDPR, and the EU AI Act (full enforcement from December 2027) — were designed with deterministic software in mind. A system with a fixed purpose, a defined input, a predictable output. Compliance was a matter of documenting what the system did and why.
 
 Agentic AI systems break this model fundamentally. An agent does not have a fixed purpose. It reasons across available data, selects actions from a dynamic action space, and produces outcomes that depend on the state of the systems it touches and the decisions of other agents operating in parallel. In a multi-agent environment, purpose evolves non-linearly. Data collected for Purpose A is reused in the course of completing a task that serves Purpose B — not through a deliberate design decision but as an emergent property of the agent's reasoning.
 
@@ -60,6 +60,27 @@ The right question is: *do I trust this outcome, given the evidence?*
 This shift — from agent trust to evidence trust — is the foundational principle of this specification. It was articulated clearly by practitioners building autonomous security agents in production, and it maps directly onto what the DUAA and EU AI Act require: not that you trust your agents, but that you can demonstrate, for any given action, the evidence that authorised it, the purpose it served, and the mechanism by which it could be reversed or remediated if wrong.
 
 The governance layer this specification defines is the infrastructure that makes that demonstration possible — in real time, not retrospectively.
+
+---
+
+## The sovereignty constraint
+
+This specification is technology-agnostic in its interface definitions. Any conformant substrate may be used. However, for regulated UK and EU enterprise deployments, a sovereignty constraint applies at the specification level — not as an implementation preference but as a compliance requirement derived from current law.
+
+**The CLOUD Act exposure problem:** Under the US CLOUD Act, US-domiciled technology companies can be compelled to produce data held on behalf of their customers, regardless of where that data is physically located. A governance layer substrate provided by, or incorporating IP from, a US-domiciled entity creates compellable access risk for the governance record — the most sensitive artefact in a regulated enterprise's data estate. This is not a contractual problem that can be solved by data processing agreements or bring-your-own-key architectures. It follows corporate nationality, not server location.
+
+**The DORA operational resilience requirement:** Under DORA (Digital Operational Resilience Act), regulated financial entities must demonstrate that critical functions can continue if a third-party technology provider becomes unavailable. A governance layer substrate that requires a runtime connection to vendor-operated infrastructure fails this test for any deployment where governance is a critical function — which it is, by definition, for any regulated enterprise.
+
+**The DUAA data controller question:** The governance record is personal data under the DUAA. The entity that determines how it is processed is the data controller. A governance layer substrate where the vendor holds, processes, or has compellable access to governance records creates a data controller ambiguity that is structurally untenable for regulated UK enterprises.
+
+**The practical implication for substrate selection:** Conformant implementations for regulated UK and EU enterprise deployments should use substrates that are:
+- Deployable on customer-controlled infrastructure with no required runtime connection to vendor-operated services
+- Domiciled outside US CLOUD Act jurisdiction (UK, EU, or other non-compellable domicile)
+- Self-contained: the governance artifact is a file the customer holds, not a record in a vendor database
+
+These constraints do not restrict the specification's technology-agnostic posture. They define the compliance context within which substrate selection for regulated deployments must be made. Implementations for non-regulated contexts are not subject to these constraints.
+
+The reference implementation (truc — see below) is built to satisfy these constraints by design, not by configuration.
 
 ---
 
@@ -96,7 +117,7 @@ The complete governance architecture for agentic systems comprises five componen
 - Purpose compatibility log: record of purpose compatibility assessments and their conclusions
 - Audit export API: tamper-evident export of decision traces for regulatory inspection
 
-**Prior art:** Ajit Jaokar's Enterprise Context Graph framework (Oxford, March 2026) provides the theoretical foundation for this layer. Corewood TETRA provides a high-performance graph database implementation suited to the latency requirements of real-time agent governance.
+**Prior art:** Ajit Jaokar's Enterprise Context Graph framework (Oxford, March 2026) provides the theoretical foundation for this layer.
 
 ---
 
@@ -110,6 +131,7 @@ The complete governance architecture for agentic systems comprises five componen
 - Validation is asynchronous and probabilistic, not synchronous and unanimous. A validator mesh is not a two-phase commit. It accumulates evidence continuously and makes confidence-weighted decisions. Synchronous unanimous agreement fails at agent scale for the same reasons XA transactions fail.
 - Confidence threshold scales with reversibility. Low-reversibility actions (writes to systems of record, external communications, financial transactions) require higher confidence thresholds before execution. High-reversibility actions (read queries, draft generation, analysis) can proceed at lower thresholds.
 - The mesh governs outcomes, not agents. Any individual validator may be wrong. The mesh is designed to reach reliable conclusions despite unreliable components — the same principle as Byzantine fault tolerant consensus.
+- **The mesh is deterministic, not probabilistic at the decision layer.** Governance primitives execute as graph operations against the decision context. This is the structural alternative to LLM-verifying-LLM — replacing non-deterministic model evaluation with deterministic, auditable, graph-grounded assessment. The audit trail records a decision that can be reproduced and verified independently.
 
 **Interface this layer must expose:**
 - Action proposal API: receive a proposed action with its context and evidence
@@ -145,9 +167,7 @@ The complete governance architecture for agentic systems comprises five componen
 
 **Alternative design principle — file-format-native tamper-evidence:** A substrate that provides per-section cryptographic integrity at the file format level — such that any modification of the file is detectable on read, as a native property of the format rather than a secondary audit layer — satisfies Layer 5 without requiring a separate append-only record. Where such a substrate is used, Layers 2 and 5 collapse into a single artifact: the decision context graph is simultaneously the tamper-evident audit trail, and verification of the file is simultaneously verification of the audit record.
 
-This is a stronger property than the hash-chaining pattern. It removes the architectural dependency between the decision context store and the audit log, eliminates the synchronisation problem between them, and makes the audit trail intrinsic to the governance artifact rather than dependent on a parallel system. Future revisions of this specification will consider whether the separation of Layers 2 and 5 reflects an architectural necessity or an accident of the specification's derivation from prior art in systems where file-format-native integrity was not available.
-
-*This architectural observation was first made in the context of this specification by Kyle Mickey, Corewood, in the TETRA technology review, April 2026.*
+This is a stronger property than the hash-chaining pattern. It removes the architectural dependency between the decision context store and the audit log, eliminates the synchronisation problem between them, and makes the audit trail intrinsic to the governance artifact rather than dependent on a parallel system. The LGT.io reference implementation (truc) implements this pattern: the governed artifact format carries file-format-native cryptographic integrity, collapsing Layers 2 and 5 into a single self-contained artifact. Future revisions of this specification will consider whether the separation of Layers 2 and 5 reflects an architectural necessity or an accident of the specification's derivation from prior art in systems where file-format-native integrity was not available.
 
 **Interface this layer must expose:**
 - Append-only write: decision records written with cryptographic chaining (hash-chain pattern) or file-format-native integrity (collapsed Layer 2/5 pattern)
@@ -190,7 +210,7 @@ This specification does not define a specific implementation. It defines the int
 
 The specification itself is technology-agnostic — it can in principle be implemented on any graph database, any LLM, and any execution environment. The Apache 2.0 licence explicitly permits this and any organisation may build their own implementation on their preferred infrastructure.
 
-The reference implementation maintained by LGT.io is built on Corewood TETRA — a deliberate choice based on TETRA's demonstrably superior performance characteristics, sovereign deployment capability, and minimal infrastructure footprint for the specific requirements of the governance layer. Other implementors are free to make different choices. The specification defines what must be true of any implementation, not how it must be built.
+The reference implementation maintained by LGT.io (truc — github.com/lgt-io/truc) is built as a sovereignty-native substrate: single binary, customer-controlled infrastructure, no required runtime connection to any LGT.io or third-party service, post-quantum cryptographic artifact format, and file-format-native tamper-evidence. This combination of properties satisfies the sovereignty constraint defined above for regulated UK and EU enterprise deployments. Other implementors are free to make different substrate choices within the technology-agnostic specification, subject to their own compliance requirements.
 
 It does not claim to solve every governance problem in agentic AI. It addresses the specific gap between what current vendor governance tooling provides and what the DUAA and EU AI Act require for organisations deploying agents across heterogeneous legacy estates.
 
@@ -201,10 +221,10 @@ It does not claim to solve every governance problem in agentic AI. It addresses 
 **v0.1 (April 2026) — Interface specification**
 This document. Defines the five layers and their required interfaces. Does not specify implementation.
 
-**v0.2 (target: June 2026) — Reference implementation**
-A minimal working implementation of all five layers against a defined test environment, using Corewood TETRA as the decision context graph and a configurable validator mesh.
+**v0.2 (target: September 2026) — Reference implementation**
+A minimal working implementation of all five layers against a defined test environment, using truc as the decision context graph and a configurable validator mesh. Architecture decision records for the reference implementation are published at github.com/lgt-io/truc.
 
-**v0.3 (target: September 2026) — DUAA compliance toolkit**
+**v0.3 (target: Q1 2027) — DUAA compliance toolkit**
 Tooling for purpose compatibility assessment and legitimate interests balancing, aligned with ICO guidance published under the DUAA. The DUAA is already in force and is the primary regulatory driver for UK deployments.
 
 **v1.0 (target: mid-2027) — EU AI Act readiness**
@@ -234,13 +254,14 @@ This specification draws on the following published work and practitioner insigh
 - Ajit Jaokar, *Enterprise Context Graphs: Data and Decision as the Foundation for Institutional AI Agents*, Oxford University, March 2026 — foundational framework for the decision context layer
 - XBow practitioner insight on validator-gated execution and evidence trust over agent trust, 2026
 - Reuven Cohen, Cognitum — proof-gated execution architecture and hardware-level governance primitives
-- Corewood TETRA and TETRAFILE — high-performance graph database and governance artifact substrate. Kyle Mickey, Corewood, contributed the TETRA technology review (April 2026) identifying the TETRA/TETRAFILE architectural distinction, the Layer 2/5 collapse property, TETRAFILE multi-recipient addressability as the candidate portable lawful commitment primitive, and post-quantum forward-security as a specification-level substrate recommendation. These contributions materially advanced the specification.
+- Peter Cranstone, 3PMobile — the two-primitive framework for formation and reliance (human-resolution event and reliance-ready unit), the reconstruction tax concept, the reliance boundary, the portable explanation versus portable act distinction, and the antecedent authority test. These formulations materially advanced the specification's treatment of cross-domain governance and are incorporated with Peter's permission.
 - Lorenzo Moriondo, tuned.org.uk — embeddings, vector retrieval, and evidence infrastructure research
 - ICO guidance on DUAA purpose limitation and legitimate interests, April 2026
 - Anthropic Project Glasswing announcement, April 2026 — industry validation of the capability threshold and governance urgency
 - IBM + Confluent acquisition, March 2026 — enterprise data substrate for real-time agent governance
+- Technology review contributions to TECHNOLOGY_REVIEW.md — practitioner assessments of candidate substrates against the specification
 
-The coordination problem this specification addresses is documented in detail in a four-part series by CJ Hodgson on LinkedIn (April 2026).
+The coordination problem this specification addresses is documented in detail in a four-part series by CJ Hodgson on LinkedIn (April 2026). The cross-tier interaction problem as a regulatory instantiation of the reliance boundary, the decision context graph as superposition of relevant context collapsed to a confidence-weighted decision at the moment of action, and the shared reality framing of antecedent authority exhaustion were formulated by CJ Hodgson, LGT.io, April 2026.
 
 ---
 
@@ -252,5 +273,5 @@ This specification may be freely used, modified, and distributed. Commercial imp
 
 ---
 
-*LGT.io — vendor-neutral agentic governance for UK and EU enterprise*
+*LGT.io — sovereignty-native agentic governance for UK and EU enterprise*
 *lgt.io | chris@lgt.io*
