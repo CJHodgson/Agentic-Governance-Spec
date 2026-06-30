@@ -59,8 +59,8 @@ FalkorDB's performance characteristics make real-time validation viable as a pre
 **Layer 4 — System contract registry.**
 The system contract registry is graph content within the truc artifact. FalkorDB provides the query surface against that content — no additional capability is required. Registry entries inherit the artifact's integrity and portability properties.
 
-**Layer 5 — Immutable audit trail.**
-FalkorDB does not provide Layer 5 directly. In the truc reference implementation, Layer 5 is provided by the artifact format's file-format-native tamper-evidence (the Merkle integrity tree over artifact sections), which collapses Layers 2 and 5 into a single artifact. FalkorDB is not involved in the audit trail property — that is a property of the artifact format, not the query engine.
+**Layer 5 — Audit integrity (tamper-evident to tamper-proof).**
+FalkorDB does not provide Layer 5 directly. In the truc reference implementation, the base tamper-evidence property is provided by the artifact format's file-format-native integrity tree, which collapses Layers 2 and 5 into a single artifact. The specification's full Layer 5 requirement — that integrity strength be a deployment-selectable property up to tamper-proof against the custodian — is addressed by a separate witnessing mechanism layered on top of the artifact format, independent of FalkorDB. FalkorDB is not involved in either property: tamper-evidence and external witnessing are both properties of the artifact format and its surrounding attestation layer, not the query engine.
 
 **Layer 1 — Data substrate.**
 Not applicable. Layer 1 is the enterprise data estate; FalkorDB is a governance substrate downstream of it.

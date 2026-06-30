@@ -87,6 +87,12 @@ The five-layer architecture as specified addresses formation adequately at v0.1.
 
 4. Identifying what regulatory recognition would need to exist — in ICO guidance, FCA rules, or primary legislation — for a governance output to constitute a primary object of reliance rather than portable evidence.
 
+### A partial answer at the formation boundary — computational verifiability
+
+While the regulatory recognition problem (point 4 above) remains open, recent work on the formation side narrows the gap in a way worth recording here. A governance output that is merely well-documented still requires the receiving party to trust the issuing institution's account of how the decision was reached. A governance output whose formation is *independently and deterministically re-derivable* by the receiving party — given the same recorded inputs and the same published, version-bound policy — requires no such trust. The receiving party does not evaluate evidence about the decision; they reproduce the decision themselves and confirm it matches.
+
+This does not by itself solve Open Problem 1 — independent re-derivation establishes that the decision was *computed correctly under the policy claimed to be in force*, which is a different and narrower claim than the decision being a *primary object of reliance* in the receiving domain's regulatory framework. But it materially strengthens the technical primitive referred to in point 1 above (the human-resolution event) and moves the portable-explanation / portable-act distinction some way toward portability: a portable explanation that can be independently and mechanically verified, with no residual trust in the issuing party's account, is a stronger object than a portable explanation that can only be read and assessed. Implementations pursuing this property should treat it as a design constraint on the governance evaluation path itself (determinism, full input capture) rather than as a property that can be retrofitted after the fact.
+
 ### The cross-tier interaction problem — a regulatory instantiation of the reliance boundary
 
 The Digital Omnibus package (March 2026) has created a specific and immediate version of this problem that does not require theoretical future scenarios to illustrate. The EU AI Act's Article 111 non-retroactivity clause creates a two-tier market: Tier 1 systems built governance-first, and Tier 2 systems deployed before December 2027 that are permanently exempt unless substantially modified.
