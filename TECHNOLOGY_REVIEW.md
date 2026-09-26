@@ -16,6 +16,7 @@ A note on the sovereignty constraint: this specification is technology-agnostic 
 **Canonical sources:** falkordb.com, github.com/FalkorDB/FalkorDB
 **Status of review:** Initial review. FalkorDB is the graph engine substrate selected for the LGT.io reference implementation (truc) v0.2 milestone.
 **Sovereignty status:** Israeli-domiciled (FalkorDB Ltd, Petah Tikva, Israel). Outside US CLOUD Act jurisdiction. Self-hostable under SSPLv1. Customer-operated deployments have no required runtime connection to FalkorDB Ltd infrastructure. Satisfies the sovereignty constraint for regulated UK and EU enterprise deployments when self-hosted.
+**Correction — 26 September 2026:** The June 2026 text of this review stated that FalkorDB exposes openCypher over the Bolt wire protocol, that Bolt-compatible client tooling works against it unchanged, and that it provides an in-process query surface. Those statements overstated the position. FalkorDB is a Redis module: it runs as a separate server process and its production query surface is the RESP command `GRAPH.QUERY`. It has had experimental Bolt support since version 4.0.0-a1 (November 2023), disabled by default, which FalkorDB documents as not recommended for production use (docs.falkordb.com/integration/bolt-support). The reference implementation therefore uses RESP. The affected passages are corrected in place below and marked; the reference implementation's ADR-005 carries the matching correction. The review's assessment of FalkorDB's suitability, licensing and sovereignty is unchanged.
 
 ---
 
@@ -23,9 +24,9 @@ A note on the sovereignty constraint: this specification is technology-agnostic 
 
 FalkorDB is a high-performance graph database built on sparse matrix algebra (GraphBLAS) for graph representation. It executes graph traversals using linear algebra operations rather than pointer-chasing, providing order-of-magnitude performance advantages over traditional graph databases for the traversal patterns characteristic of governance decision context queries.
 
-FalkorDB is the direct successor to RedisGraph following its end-of-life in January 2025. It exposes the openCypher query language over the Bolt wire protocol — the interfaces widely established by prior art in the graph database market — and is therefore addressable by any existing Bolt-compatible client tooling without modification.
+FalkorDB is the direct successor to RedisGraph following its end-of-life in January 2025. It executes the openCypher query language, submitted over RESP (the Redis serialisation protocol) via the `GRAPH.QUERY` command. FalkorDB also offers experimental, non-production Bolt support aimed at Neo4j driver compatibility. *(Corrected 26 September 2026: this sentence previously said FalkorDB exposes openCypher over Bolt and is addressable by Bolt client tooling without modification. That support exists only in experimental form.)*
 
-For the purposes of the LGT.io reference implementation, FalkorDB serves as the query execution layer for the decision context graph. The truc artifact format (a protobuf-enveloped file with Merkle integrity tree and post-quantum cryptographic sealing) is the durable governance artifact. FalkorDB provides the in-process query surface against the loaded graph. The relationship is: truc owns the artifact; FalkorDB owns the query execution. When a truc artifact is opened, its graph content is loaded into FalkorDB; queries execute via openCypher; mutations are written back to the artifact on commit.
+For the purposes of the LGT.io reference implementation, FalkorDB serves as the query execution layer for the decision context graph. The truc artifact format (a protobuf-enveloped file with Merkle integrity tree and post-quantum cryptographic sealing) is the durable governance artifact. FalkorDB provides the query execution layer against the loaded graph, running as a separate, co-located process inside the customer's deployment unit. *(Corrected 26 September 2026: previously "in-process".)* The relationship is: truc owns the artifact; FalkorDB owns the query execution. When a truc artifact is opened, its graph content is loaded into FalkorDB; queries execute via openCypher; mutations are written back to the artifact on commit.
 
 ---
 
@@ -42,9 +43,11 @@ FalkorDB's sparse matrix algebra implementation provides performance characteris
 
 These characteristics make FalkorDB viable as a pre-execution governance gate substrate — where query latency must be low enough that governance evaluation does not materially slow agent execution.
 
-**openCypher and Bolt compatibility**
+**openCypher and wire protocol**
 
-Full openCypher support over Bolt is the specification's required wire protocol (as defined in the reference implementation's ADR-005). FalkorDB satisfies this without adaptation. Existing Neo4j-compatible client tooling works against FalkorDB unchanged.
+The reference implementation's client-facing surface is specified as openCypher over Bolt 5.x with TLS 1.3 (ADR-005). FalkorDB does not provide that surface itself in production form: it accepts openCypher over RESP, and its Bolt listener is experimental. In truc, the Bolt surface is presented by truc's own server layer, which translates client queries into RESP `GRAPH.QUERY` calls against the bundled FalkorDB instance. The truc-to-FalkorDB connection is internal to the deployment unit and is not exposed to clients. Neo4j-compatible client tooling is intended to work against truc's Bolt surface, not against FalkorDB directly.
+
+*(Corrected 26 September 2026: this passage previously stated that FalkorDB satisfies the Bolt requirement without adaptation and that Neo4j-compatible tooling works against FalkorDB unchanged. Neither holds for production use.)*
 
 ---
 
@@ -84,7 +87,7 @@ FalkorDB's graph traversal capabilities are directly applicable to population-le
 
 FalkorDB is released under SSPLv1 (Server Side Public License v1). The practical implications are:
 
-- Self-hosted deployments (where the customer runs FalkorDB on their own infrastructure) do not trigger SSPLv1's service provision clause. For the truc reference implementation's primary deployment model — single binary on customer-controlled infrastructure — SSPLv1 does not require open-sourcing any additional code.
+- Self-hosted deployments (where the customer runs FalkorDB on their own infrastructure) do not trigger SSPLv1's service provision clause. For the truc reference implementation's primary deployment model — one self-contained deployment unit (the truc binary plus a bundled FalkorDB instance) on customer-controlled infrastructure — SSPLv1 does not require open-sourcing any additional code.
 - Hosted service deployments (where LGT.io or a customer operates FalkorDB as a service provided to other users) trigger SSPLv1's requirement to open-source the code that enables that service, or to obtain a commercial licence from FalkorDB Ltd.
 - Commercial licences are available from FalkorDB Ltd for service provision contexts.
 
@@ -106,7 +109,7 @@ A substrate review is only useful if it also identifies where the substrate does
 
 ### Implications for the specification
 
-This review does not change the specification's technology-agnostic posture. Any substrate providing equivalent capabilities — full openCypher over Bolt, GraphBLAS-based traversal performance, multi-tenancy, self-hostable sovereignty — satisfies the same requirements.
+This review does not change the specification's technology-agnostic posture. Any substrate providing equivalent capabilities — full openCypher query execution (the client-facing wire protocol is the implementation's concern, not the substrate's), GraphBLAS-based traversal performance, multi-tenancy, self-hostable sovereignty — satisfies the same requirements.
 
 The review confirms that a production-quality, sovereignty-compliant graph engine substrate is available for implementations targeting the specification. The reference implementation's architecture decision records (github.com/lgt-io/truc) document the specific integration approach, licensing considerations, and design rationale for FalkorDB as the v0.2 substrate.
 
