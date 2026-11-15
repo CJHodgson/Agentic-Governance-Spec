@@ -74,7 +74,7 @@ Not applicable. Layer 1 is the enterprise data estate; FalkorDB is a governance 
 
 ### How these capabilities map to the open problems
 
-**Open problem 1 — The portable lawful commitment artifact.**
+**Open problem 1 — Reliance without reconstruction.**
 FalkorDB's graph query surface is relevant to formation (Layer 2 decision context construction). It plays no part in how the resulting governed record is held or verified. In the reference implementation, that is provided by the truc artifact format's multi-recipient cryptographic addressability — a property of the file format, not the query engine — which lets a record held by the institution be verified locally by each named recipient. FalkorDB's role is to provide the query surface against the decision context that informs the formation event; how the resulting record is held and verified is independent of FalkorDB. *(Wording revised November 2026 to align with the specification's "held by the institution, verifiable locally" framing; no change to substance.)*
 
 **Open problem 2 — Temporal validity of lawful commitments.**
