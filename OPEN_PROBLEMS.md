@@ -6,11 +6,11 @@ These are named as open problems rather than deferred features. They are structu
 
 ---
 
-## Open problem 1 — The portable lawful commitment artifact
+## Open problem 1 — reliance without reconstruction 
+Previously titled “The portable lawful commitment artifact”.
+**Formulation:** How can a receiving institution verify a governed decision and act on it, without rebuilding it? Candidate approach: signed records with recipient-addressed encryption.
 
-**Formulation:** A decision graph, validator mesh, and immutable audit trail can explain and defend an outcome within a single governance domain. But if the next domain still has to reconstruct why the act was valid, then the act itself does not hold across domain boundaries.
-
-**The concrete case:** A clinically valid decision is made. It must then move through dispensing, funding approval, and audit review. What exactly reaches the next domain that it can rely on directly, without reopening the prior act? In the current specification, the answer is a decision trace in the audit log — which the next domain must still interpret against its own governance context. That is reconstruction, not portability.
+**The concrete case:** A clinically valid decision is made. It must then move through dispensing, funding approval, and audit review. What exactly reaches the next domain that it can rely on directly, without reopening the prior act? In the current specification, the answer is a decision trace in the audit log — which the next domain must still interpret against its own governance context. That is reconstruction, not reliance.
 
 **Why the five-layer architecture is insufficient here:** The immutable audit trail (Layer 5) records what happened and proves it occurred. The validator mesh (Layer 3) authorised the action under the governance rules of the originating domain. Neither makes the act self-validating in a receiving domain that has its own regulatory context, its own legitimate interests test, and its own interpretation of compatible reuse under the DUAA.
 
