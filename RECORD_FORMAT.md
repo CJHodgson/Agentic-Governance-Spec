@@ -113,9 +113,9 @@ The messages that appear *inside* sections are in [section 3](#3-sections) and [
 
 **Version.** `format_version` must be 2. Version 1 files left `format_version`, `artifact_id` and `created_at_unix_nanos` outside the integrity seal; they are not accepted, and a verifier must not check them under a weaker rule.
 
-**Sections present.** An artifact written under this version has exactly four sections: `GRAPH_DATA` (1), `AUDIT_CHAIN` (3), `METADATA` (5) and `POLICY_BUNDLE` (6). A writer produces at most one section of each type. The integrity tree orders sections by type only, so the order of two sections of one type is undefined; a verifier should reject a file that has two. A verifier that cannot find a required section cannot verify the file and must not report it valid.
+**Sections present.** An artifact written under this version has exactly four sections: `GRAPH_DATA` (1), `AUDIT_CHAIN` (3), `METADATA` (5) and `POLICY_BUNDLE` (6). A writer produces at most one section of each type. The integrity tree orders sections by type only, so the order of two sections of one type is undefined: a verifier **must report a file with two sections of one type INVALID**, even when its integrity tree and seal are consistent. A verifier that cannot find a required section cannot verify the file and must not report it valid.
 
-**Unknown content.** Protocol Buffers parsers skip fields they do not know. Nothing a parser skips is covered by the integrity tree, so a verifier should reject a file that carries fields or enum values it does not recognise in the messages above.
+**Unrecognised content.** A field number that is not in the messages of this document, or an enum value that is not listed in them, is *unrecognised*. Protocol Buffers parsers skip such fields, and the integrity tree does not cover them, so a verifier cannot tell whether they were written by a newer version of the format or added afterwards. A verifier therefore **must not report a file with unrecognised content VALID, and must not report it INVALID on that ground alone**: it carries on with every check below on what it does recognise, and if nothing else fails the outcome is **NOT VERIFIED** (the file may be in a newer format than the verifier supports). The same applies to the JSON documents of section 3.2: a field in a section that is not in that section's message is unrecognised. (The decision record of section 8 is different: it gains optional fields without a change of schema, and unknown fields in it are ignored.)
 
 ## 3. Sections
 
@@ -189,7 +189,7 @@ Two attribute keys have a defined meaning:
 | `enrolled_signing_key_fingerprints` | The fingerprints (section 5) of the writer signing keys enrolled for this artifact: lower-case hex, comma-separated, no spaces. |
 | `graph_data_history/<hex>` | A superseded `GRAPH_DATA` message: the standard base64 of its canonical encoding (section 9), where `<hex>` is the SHA-256 of those bytes. One attribute per superseded version. |
 
-Other attributes are allowed and are ignored by a verifier.
+Other attributes are allowed and are ignored by a verifier (an attribute key is data, not a field of the message).
 
 ## 4. Recipients and the content key
 
@@ -214,7 +214,7 @@ wrapped_content_key = nonce(12) || AES-256-GCM-seal( wrapping_key, nonce, conten
 
 `decimal(len)` is the length in ASCII decimal digits; `hex(fp)` is lower case. HKDF with no salt uses a salt of 32 zero bytes (RFC 5869, section 2.2). Opening the header is the reverse: split off the 12-byte nonce, decrypt with the wrapping key and `aad`, and require 32 bytes of plaintext. A header that does not open under the recipient key is a failure to read the artifact.
 
-**Consistency.** If `algorithm_params.kem_algorithm` is 1, every recipient header must carry a non-empty `ml_kem_ciphertext`; a header without one misstates the protection and makes the artifact invalid. Value 255 marks development use only; an artifact naming it is never valid. Any other value is invalid.
+**Consistency.** If `algorithm_params.kem_algorithm` is 1, every recipient header must carry a non-empty `ml_kem_ciphertext`; a header without one misstates the protection and makes the artifact invalid. Value 255 marks development use only; an artifact naming it is never valid. Value 0 is invalid, and a value not listed in section 2 is unrecognised content.
 
 ## 5. Writer keys and signatures
 
@@ -275,7 +275,7 @@ root_hash = SHA256( content_root || header_hash )
 
 **What the tree does not cover.** `recipients`, `integrity_tree` and `signature` are outside the tree (the first must be able to change when a recipient is added; the other two are its output). The seal signature covers the tree, and so the sections and the six fields, and nothing more.
 
-**Worked example.** The vector file gives an artifact with four sections. Its header fields hash (in order) to `681ab620…`, `0273a78e…`, `3e4769e3…`, `920a241d…`, `22759af6…` and `737333ee…`. Its sections of types 1, 3, 5 and 6 hash to `3c673efd…`, `51e26f6a…`, `c994ea04…` and `04d85142…`. The root is `023d187de3f505d48fc3064a362800f30229345c833207b86b0237b74b9d64c6`. An artifact with the same header and no sections has a root of `cf291061cd1cabcfe52a6554728b7e8b03dee56a693eeeeaf19deeb87b16a1c2`.
+**Worked example.** The vector file gives an artifact with four sections. Its header fields hash (in order) to `681ab620…`, `0273a78e…`, `3e4769e3…`, `920a241d…`, `22759af6…` and `737333ee…`. Its sections of types 1, 3, 5 and 6 hash to `3c673efd…`, `b8245b29…`, `f23c6388…` and `04d85142…`. The root is `121220ca013b7c4deec3d9147374894cdbcbbdcc9b41bf91b436f312e7e16fc1`. An artifact with the same header and no sections has a root of `cf291061cd1cabcfe52a6554728b7e8b03dee56a693eeeeaf19deeb87b16a1c2`.
 
 ## 7. The audit chain
 
@@ -416,14 +416,14 @@ Modes H and P are reserved: a verifier must not report a file in those modes val
 **Outcomes:**
 
 * **VALID:** every check passed, all signatures are real, and, for a mode W file, the witness was consulted and every head is within its retention.
-* **INVALID:** a check failed. The verifier names each failing item. Anything that shows the file was altered, truncated or not written by the trust-anchor key is invalid.
-* **NOT VERIFIED:** nothing failed, but something could not be established: a mode W file with no witness available, a witnessed head whose retention has lapsed, a signature that is a development placeholder, or a development-only KEM. It is never reported as VALID.
+* **INVALID:** a check failed. The verifier names each failing item. Anything that shows the file was altered, truncated, has two sections of one type, or was not written by the trust-anchor key is invalid.
+* **NOT VERIFIED:** nothing failed, but something could not be established: the file carries content this version does not define (section 2, "Unrecognised content": a newer format than the verifier supports), a mode W file with no witness available, a witnessed head whose retention has lapsed, a signature that is a development placeholder, or a development-only KEM. It is never reported as VALID.
 
 An error that stops the procedure (a section that will not decrypt, a missing required section, a file that does not parse) is reported as a failure to verify, not as a verdict on the file; it is never VALID.
 
 **Steps.** Each step uses only what the earlier ones have established.
 
-1. **Parse** the file as `Artifact`. Require `format_version = 2`.
+1. **Parse** the file as `Artifact`. Require `format_version = 2`. Require at most one section of each type (a repeat is INVALID). Note any unrecognised content (section 2); it does not stop the procedure, and it makes the final outcome NOT VERIFIED unless a check fails.
 2. **Integrity tree** (section 6). Require a stored tree. Recompute the root and compare it with `integrity_tree.root_hash`; if they differ, report INVALID, naming the header fields and sections whose stored per-item hash differs from the recomputation, and **stop**: no section can be trusted. Then require the stored `section_hashes` and `header_field_hashes` to equal the recomputation.
 3. **Algorithm parameters** (section 4, "Consistency"): the KEM named in the header against the recipient headers.
 4. **Open the content key**: find the recipient header whose fingerprint equals the supplied recipient key's, decapsulate and unwrap it. Decrypt the sections (3.1).
@@ -449,16 +449,18 @@ A verifier that stops at the first failure is conforming; one that reports every
 * `chain`: the genesis head and three entries with their hashes and signature messages, the third using the reference form of a decision to test its hash (section 7); it is not in the artifact.
 * `graph_data`: a canonical `GraphData` encoding and its hash (section 9).
 
+* `cases`: the outcome each of four files must get under section 11 and why. `valid` is the artifact above. `duplicate-section` is a second file (`file_base64`) with a repeated `GRAPH_DATA` section, **re-sealed and re-signed so that its tree, seal and chain are all consistent**: the duplicate is the only fault, and the expected outcome is INVALID. `unknown-field` is the artifact above with one undefined field (number 99) appended to the `Artifact` message: nothing the tree covers changes, every check passes, and the expected outcome is **NOT VERIFIED**. `altered-section` flips one byte of the `GRAPH_DATA` payload: INVALID, by the integrity tree. A mutation is given as an operation on the first file (`append_hex`, `flip_byte_offset`).
+
 Two checkers are included. Neither is part of the format.
 
-* [`test-vectors/check_vectors.py`](test-vectors/check_vectors.py) recomputes everything above that is a hash, a message or a key derivation, from the file bytes and the rules in this document, using only the Python standard library. It exits non-zero on any difference.
+* [`test-vectors/check_vectors.py`](test-vectors/check_vectors.py) recomputes everything above that is a hash, a message or a key derivation, from the file bytes and the rules in this document, using only the Python standard library. It also classifies each case by structure (a repeated section type or a root mismatch is INVALID; an undefined field with a matching root is NOT VERIFIED) and compares that with `expected_outcome`. It exits non-zero on any difference.
 * [`test-vectors/check_crypto`](test-vectors/check_crypto) (Go 1.26 or later, standard library only) verifies the Ed25519 and ML-DSA-65 halves of the seal and entry signatures with the empty ML-DSA context, confirms that a changed message fails, unwraps the content key from the vector's shared secret and decrypts every section to the plaintext shown. Run it with `go run . ../record-format-v2.json` in that directory.
 
-The values were first produced by one implementation (the signatures and the key encapsulation by its post-quantum library); both checkers were written from this document, in other languages and with other libraries, and agree. Two things are **not** checked by them and should be tested by a verifier against the vector with its own library: the X-Wing decapsulation that produces the shared secret (the recipient's seed, public key and ciphertext are given, and the X-Wing draft has its own vectors), and parsing the protobuf `Artifact` from `file_base64` with a real Protocol Buffers library (the Python checker reads it with a hand-written reader).
+The values were first produced by one implementation (the signatures and the key encapsulation by its post-quantum library); both checkers were written from this document, in other languages and with other libraries, and agree. Not checked by them, and to be tested by a verifier against the vector with its own library: the X-Wing decapsulation that produces the shared secret (the recipient's seed, public key and ciphertext are given, and the X-Wing draft has its own vectors), the signature on the `duplicate-section` file's seal (it is a valid seal over its own tree, made with the same key), and parsing the protobuf `Artifact` from `file_base64` with a real Protocol Buffers library (the Python checker reads it with a hand-written reader).
 
 ## 13. Versioning and what this document does not cover
 
-**Versioning.** `format_version` names the layout of the whole file and of the integrity tree: a change to any hash input in sections 6 and 7 is a new `format_version`, and the layouts for a shipped version never change. The decision record's `schema` is versioned separately and may gain optional fields without a new schema.
+**Versioning.** `format_version` names the layout of the whole file and of the integrity tree: a change to any hash input in sections 6 and 7 is a new `format_version`, and the layouts for a shipped version never change. The decision record's `schema` is versioned separately and may gain optional fields without a new schema. A future format version may replace the `lgt.io/truc/...` domain-separation constants with neutral ones; a verifier selects the constants by `format_version`, so files already written are unaffected.
 
 **Not covered here:**
 

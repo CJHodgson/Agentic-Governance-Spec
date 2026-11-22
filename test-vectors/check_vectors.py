@@ -145,5 +145,44 @@ g = ld(1, node("dataset-0001", ["Dataset"], {"region": "UK", "age_days": 30, "sp
 eq("graph data canonical encoding", g, x(V["graph_data"]["deterministic_encoding_hex"]))
 eq("graph data sha256", H(g), x(V["graph_data"]["sha256_hex"]))
 
+
+# ---- outcome cases (document section 11): structure-level classification ----
+def classify(raw):
+    """What the structure alone decides: INVALID (tree mismatch or a repeated section type),
+    NOT VERIFIED (a field this version does not define), else VALID so far. Signatures and
+    decryption are checked by check_crypto, not here."""
+    top = fields(raw)
+    known = set(range(1, 11))
+    unknown = sorted({k for k, _ in top if k not in known})
+    g = lambda f: [v for k, v in top if k == f]
+    secs = []
+    for sb in g(10):
+        d = dict(fields(sb)); secs.append((d.get(1, 0), d.get(2, b""), d.get(3, b""), d.get(4, 0)))
+    types = [t for t, *_ in secs]
+    dup = len(types) != len(set(types))
+    secs.sort(key=lambda s: s[0])
+    leaves = [H(u32(t) + lp(n) + u32(sv) + lp(p)) for (t, p, n, sv) in secs]
+    ap = dict(fields(g(5)[0])); head = g(6)[0] if g(6) else b""
+    art_id = g(2)[0]; hf = [("format_version", u32(g(1)[0])), ("artifact_id", art_id), ("created_at", u64(g(3)[0])),
+        ("integrity_mode", u32(g(4)[0] if g(4) else 0)),
+        ("algorithm_params", u32(ap.get(1, 0)) + u32(ap.get(2, 0)) + u32(ap.get(3, 0))), ("audit_chain_head", head)]
+    hh = H(b"".join(H(domain + lp(n.encode()) + lp(v)) for n, v in hf))
+    root_ok = H(merkle(leaves) + hh) == dict(fields(g(8)[0]))[1]
+    if dup or not root_ok: return "INVALID", dict(duplicate=dup, root_matches=root_ok)
+    if unknown: return "NOT VERIFIED", dict(unknown_fields=unknown)
+    return "VALID", {}
+
+for c in V["cases"]:
+    if "file_base64" in c: data = base64.b64decode(c["file_base64"])
+    else:
+        data = bytearray(base64.b64decode(A["file_base64"]))
+        m = c["mutation"]
+        if m:
+            if "append_hex" in m: data += x(m["append_hex"])
+            if "flip_byte_offset" in m: data[m["flip_byte_offset"]] ^= 1
+        data = bytes(data)
+    got, why = classify(data)
+    eq("case %s -> %s %s" % (c["id"], c["expected_outcome"], why), got, c["expected_outcome"])
+
 print("\nFAILED: %s" % fails if fails else "\nall checks passed")
 sys.exit(1 if fails else 0)

@@ -183,6 +183,8 @@ This is a stronger property than the hash-chaining pattern. It removes the archi
 - Verification API: confirm that a given record has not been modified since creation
 - Regulatory export: structured export of audit records in formats compatible with ICO and EU AI Act inspection requirements
 
+The record format and the procedure that verifies it, in enough detail to write an independent verifier, are in [RECORD_FORMAT.md](RECORD_FORMAT.md), with synthetic test vectors in [test-vectors/](test-vectors/).
+
 ---
 
 ## DUAA compliance mapping
