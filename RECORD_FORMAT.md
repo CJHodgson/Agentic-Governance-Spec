@@ -6,7 +6,7 @@ This document describes the file that records governance decisions and the proce
 
 All example values are synthetic. The machine-readable test vectors in [`test-vectors/record-format-v2.json`](test-vectors/record-format-v2.json) were produced by one implementation and reproduced by a second, independent one (see [Test vectors](#12-test-vectors)).
 
-Contents: [1 Conventions](#1-conventions) · [2 The file](#2-the-file) · [3 Sections](#3-sections) · [4 Recipients and the content key](#4-recipients-and-the-content-key) · [5 Writer keys and signatures](#5-writer-keys-and-signatures) · [6 Integrity tree, version 2](#6-integrity-tree-version-2) · [7 The audit chain](#7-the-audit-chain) · [8 The decision record](#8-the-decision-record) · [9 Policy bundle and graph-data hashes](#9-policy-bundle-and-graph-data-hashes) · [10 Integrity modes and witnesses](#10-integrity-modes-and-witnesses) · [11 The verification procedure](#11-the-verification-procedure) · [12 Test vectors](#12-test-vectors) · [13 Versioning and what this document does not cover](#13-versioning-and-what-this-document-does-not-cover)
+Contents: [1 Conventions](#1-conventions) · [2 The file](#2-the-file) · [3 Sections](#3-sections) · [4 Recipients and the content key](#4-recipients-and-the-content-key) · [5 Writer keys and signatures](#5-writer-keys-and-signatures) · [6 Integrity tree, version 2](#6-integrity-tree-version-2) · [7 The audit chain](#7-the-audit-chain) · [8 The decision record](#8-the-decision-record) (with [8.1 The resolution record](#81-the-resolution-record)) · [9 Policy bundle and graph-data hashes](#9-policy-bundle-and-graph-data-hashes) · [10 Integrity modes and witnesses](#10-integrity-modes-and-witnesses) · [11 The verification procedure](#11-the-verification-procedure) · [12 Test vectors](#12-test-vectors) · [13 Versioning and what this document does not cover](#13-versioning-and-what-this-document-does-not-cover)
 
 ---
 
@@ -359,7 +359,7 @@ An `inline_decision` is a JSON document (UTF-8, any white space; the bytes are w
 
 | Field | Meaning |
 |---|---|
-| `schema` | `"truc.decision/v2"` (current) or `"truc.decision/v1"` (read, no longer written). Any other value is invalid. |
+| `schema` | `"truc.decision/v2"` (current), `"truc.decision/v1"` (read, no longer written), or `"truc.resolution/v1"` (section 8.1). A value not listed here is unrecognised. |
 | `agent_id` | The identity of the caller who proposed the action. **Required in v2, forbidden in v1.** A v1 record is read as written by the agent `"cli"`. |
 | `decided_at` | RFC 3339, UTC, nanosecond precision. |
 | `action_sha256` | SHA-256 (hex) of the proposed-action document exactly as received. |
@@ -372,6 +372,50 @@ An `inline_decision` is a JSON document (UTF-8, any white space; the bytes are w
 | `reasons` | A list of strings. |
 
 A verifier must ignore fields it does not know: records gain optional fields without a change of `schema`, and an older record never has them. It must not require the others to be present, other than as stated.
+
+**Unrecognised schema.** An entry whose decision record names a `schema` value this version does not list is **NOT VERIFIED**, "requires a newer reader": it is not reported invalid on that ground, and not reported valid. The entry-level checks of section 7 (sequence, links, entry hash, signature) still run and can still make the entry, or the file, invalid on their own account; only the checks that read the record's fields are skipped for it.
+
+### 8.1 The resolution record
+
+An `inline_decision` may instead record a **resolution**: a human decision on an escalated action, the marker that turns on case tracking from a point in the chain, or the record that a case's expiry passed or that an agent's retry consumed it. The entry that holds a resolution is an ordinary `AuditChainEntry` (section 7): the entry hash, the signed message and the chain links are unchanged; only the content of `inline_decision` differs, under the schema `truc.resolution/v1`.
+
+Terms used below:
+
+* A **case** is one `ESCALATE` decision record (section 8) together with every resolution entry that names it by `case_entry_hash`.
+* An **approver** is the party a resolution records in `approver.id`.
+* A **principal** identifies the authority a party acts under — a role or an account, kept separate from the party's own id — so that an approver acting under the escalating agent's own authority can be told apart even when the two use different ids.
+
+A resolution is a JSON document, encoded as in the opening paragraph of section 8. A writer writes these fields in the order given, omitting any not present for the `kind`; a reader accepts any white space between them and, as in section 8, ignores fields it does not know.
+
+| Field | Meaning |
+|---|---|
+| `schema` | `"truc.resolution/v1"`. |
+| `kind` | `cases_enabled`, `approve`, `reject`, `expire`, `release`, or `release_refused`. |
+| `case_entry_hash` | Present on every kind but `cases_enabled`. The `entry_hash` (section 7) of the `ESCALATE` decision record this resolution concerns. |
+| `case_sequence` | Present wherever `case_entry_hash` is. That entry's `sequence_number`. |
+| `action_sha256` | Present wherever `case_entry_hash` is. Copied from the escalation record: binds the resolution to the exact proposed-action bytes it concerns. |
+| `agent_id` | Present wherever `case_entry_hash` is. The escalation's `agent_id`. |
+| `agent_principal` | Present, optionally, on `approve` and `reject`. The escalating agent's principal at the time. |
+| `approver` | Present on `approve` and `reject`. An object `{id, principal?}`: opaque identifiers, never a name or an email address. |
+| `decision` | Present on every kind but `cases_enabled`: `APPROVE` (on `approve`), `REJECT` (on `reject`), `REFUSE` (on `expire` and `release_refused`), or `ALLOW` (on `release`). |
+| `reason` | Present on `expire` and `release_refused`: `case_expired`, `policy_refuses_at_release`, or `new_escalation_reasons`. |
+| `reason_code` | Present on `approve` and `reject`: one of `within_mandate`, `checked_with_owner`, `insufficient_evidence`, `outside_mandate`, `agent_or_mapping_change_needed`, `other`. |
+| `comment_sha256` | Present, optionally, on `approve` and `reject`. SHA-256 of a random 128-bit value followed by a comment; neither the comment nor that value is part of this format. |
+| `decided_at` | Present on `cases_enabled`, `approve`, `reject` and `expire`. RFC 3339, UTC, the `Z` suffix, nanosecond precision where given; any other offset is invalid. |
+| `approvals_required` | Present on `approve` and `reject`: `1` or `2`, copied from the policy bundle that raised the case. |
+| `approval_entry_hashes` | Present on `release` and `release_refused`: the entry hashes of the `approve` resolutions relied on. |
+| `released_at` | Present on `release` and `release_refused`, in the same form as `decided_at`. |
+| `reevaluation` | Present on `release` and `release_refused`: an object `{policy_bundle_sha256, graph_data_sha256, params, verdict, reasons}` holding the policy result computed again at release, where `params` holds `{confidence_threshold, trip_threshold, window_seconds, agent_action_cap?, escalation_target}`, the governance parameters that computation used. |
+
+**Expiry** is elapsed time, not a calendar offset: `expires_at` is `decided_at` of the escalation plus a configured number of seconds.
+
+**Kinds.** `cases_enabled` marks the point in the chain after which an `ESCALATE` decision record starts a case; it occurs at most once. `approve` and `reject` record an approver's decision on a case. `expire` records that a case's expiry passed with no terminal resolution. `release` records that the agent's retry of the identical action consumed a satisfied case, after the policy was evaluated again; `release_refused` records the same retry when that re-evaluation's verdict is `REFUSE`, or is `ESCALATE` with a reason the escalation did not record (reasons compared as exact strings; an `ESCALATE` with no reasons counts as a new one).
+
+**Linkage.** `case_entry_hash` names the escalation by its entry hash — a chain position and a content commitment together. Every resolution comes after its escalation in chain order, and after the marker. `case_sequence`, `action_sha256` and `agent_id` equal the escalation's. A resolution for a case that already has a terminal resolution (a `reject`, an `expire`, or a `release` or `release_refused`) is invalid. Ordering within a case otherwise follows chain order; only `decided_at` and `released_at` above are subject to a time rule, and only against expiry: `approve`, `reject` and `release` are recorded at or before the case's expiry, and `expire` at or after it.
+
+**Checks a reader that understands this schema makes**, for every resolution entry, in addition to the entry-level checks of section 7: the named escalation exists, precedes the resolution, is an `ESCALATE` decision record, and its entry hash equals `case_entry_hash`; `case_sequence`, `action_sha256` and `agent_id` agree with it; the case has exactly one `cases_enabled` marker before it; an `approve` count for the case never exceeds `approvals_required`; approvers within a case hold distinct ids and distinct principals (an absent principal stands in for the id); no approver is the escalating agent, and no approver's principal equals the entry's `agent_principal` (or, absent that, its id); a `release` or `release_refused` names exactly `approvals_required` `approve` entries of the case, at most once per such entry, and none after an `expire` or a `reject`; a `release` whose `reevaluation.verdict` is `REFUSE` is invalid; and `reevaluation`'s `policy_bundle_sha256` and `graph_data_sha256`, where present, resolve as in section 9.
+
+**Checks that need re-running a decision are informative** (section 13): comparing `approvals_required` against the policy bundle that raised the case, the time rule above, and re-running the policy bundle and graph data a `release` or `release_refused` names to confirm its recorded verdict and reasons match. A reader that performs these and finds a mismatch should report it, but a reader that does not is still a conforming reader of this format.
 
 ## 9. Policy bundle and graph-data hashes
 
@@ -390,7 +434,7 @@ The vector file gives a small `GraphData` and its canonical bytes and hash (`670
 
 **Resolving a recorded hash.** A record's `graph_data_sha256` resolves if it equals the hash of the artifact's current `GRAPH_DATA`, or if `METADATA` holds an attribute `graph_data_history/<that hash>` whose base64 decodes to bytes that hash to the same value. A history entry whose bytes do not hash to their key is an error.
 
-**The current graph is tied to the last decision.** The `graph_data_sha256` of the **last** record must equal the hash of the current `GRAPH_DATA`, and must not be empty. Without this, an altered current graph would still appear to resolve through the earlier versions kept in the history.
+**The current graph is tied to the last decision.** The `graph_data_sha256` of the **last decision record** — the last entry whose inline decision is a decision record (section 8), skipping any resolution (section 8.1) that follows it — must equal the hash of the current `GRAPH_DATA`, and must not be empty. Without this, an altered current graph would still appear to resolve through the earlier versions kept in the history. A resolution's `reevaluation.graph_data_sha256` (section 8.1), where present, resolves by the rule just above: against the current `GRAPH_DATA` or an entry in `graph_data_history`, not against this last-decision rule.
 
 ## 10. Integrity modes and witnesses
 
@@ -417,7 +461,7 @@ Modes H and P are reserved: a verifier must not report a file in those modes val
 
 * **VALID:** every check passed, all signatures are real, and, for a mode W file, the witness was consulted and every head is within its retention.
 * **INVALID:** a check failed. The verifier names each failing item. Anything that shows the file was altered, truncated, has two sections of one type, or was not written by the trust-anchor key is invalid.
-* **NOT VERIFIED:** nothing failed, but something could not be established: the file carries content this version does not define (section 2, "Unrecognised content": a newer format than the verifier supports), a mode W file with no witness available, a witnessed head whose retention has lapsed, a signature that is a development placeholder, or a development-only KEM. It is never reported as VALID.
+* **NOT VERIFIED:** nothing failed, but something could not be established: the file carries content this version does not define (section 2, "Unrecognised content": a newer format than the verifier supports), an entry's decision record names a schema this version does not recognise (section 8), a mode W file with no witness available, a witnessed head whose retention has lapsed, a signature that is a development placeholder, or a development-only KEM. It is never reported as VALID.
 
 An error that stops the procedure (a section that will not decrypt, a missing required section, a file that does not parse) is reported as a failure to verify, not as a verdict on the file; it is never VALID.
 
@@ -432,7 +476,7 @@ An error that stops the procedure (a section that will not decrypt, a missing re
 7. **Chain.** Parse `AUDIT_CHAIN`. Check sequence, links and entry hashes (section 7), and the header's `audit_chain_head`. Check every entry's signature over `M_entry`. Report every failure, entry by entry.
 8. **Witness** (section 10), for a mode W file, or whenever a witness store is supplied: with a store supplied, always look at what it holds under this `artifact_id`, whatever mode the file now claims.
 9. **Policy bundles.** Every stored bundle's bytes must hash to its `bundle_hash` (section 9).
-10. **Records.** For each entry, parse its inline decision (section 8) and require the schema rules (an entry that holds a reference instead of an inline record has no record to read, and fails this step); require its `policy_bundle_sha256` to resolve to a stored bundle (or be `policy-bundle-unavailable`); require its `graph_data_sha256` to resolve (section 9). Then apply the last-decision rule: the last record's `graph_data_sha256` is non-empty and equals the hash of the current `GRAPH_DATA`.
+10. **Records.** For each entry, parse its inline decision (section 8); an entry that holds a reference instead of an inline record has no record to read, and fails this step. A record naming a schema this version does not recognise makes that entry NOT VERIFIED (section 8) and skips the rest of this step for it. For a decision record (`truc.decision/v1` or `/v2`): require its `policy_bundle_sha256` to resolve to a stored bundle (or be `policy-bundle-unavailable`); require its `graph_data_sha256` to resolve (section 9). For a resolution record (`truc.resolution/v1`, section 8.1): require the checks of section 8.1, and, where `reevaluation` is present, require its `policy_bundle_sha256` and `graph_data_sha256` to resolve (section 9). Then apply the last-decision rule (section 9): the last decision record's `graph_data_sha256` is non-empty and equals the hash of the current `GRAPH_DATA`.
 
 A verifier that stops at the first failure is conforming; one that reports every failure is more useful. The verdict is INVALID if any step failed, otherwise NOT VERIFIED if any outcome above was unresolved, otherwise VALID.
 
@@ -448,12 +492,13 @@ A verifier that stops at the first failure is conforming; one that reports every
 * `artifact.header_field_hashes`, `artifact.section_hashes`, `artifact.integrity_root_hex`, and `empty_artifact` (a file with no sections): section 6.
 * `chain`: the genesis head and three entries with their hashes and signature messages, the third using the reference form of a decision to test its hash (section 7); it is not in the artifact.
 * `graph_data`: a canonical `GraphData` encoding and its hash (section 9).
+* `resolutions`: a chain, from the same genesis head, of a `cases_enabled` marker, an `ESCALATE` decision record and an `approve` resolution (section 8.1), with every entry-hash input written out, followed by a fourth entry whose record names an unrecognised schema (`truc.resolution/v2`) to test the rule of section 8: a structurally valid, correctly linked entry that a reader must report NOT VERIFIED because it does not recognise the schema. None of the four is in the artifact above.
 
 * `cases`: the outcome each of four files must get under section 11 and why. `valid` is the artifact above. `duplicate-section` is a second file (`file_base64`) with a repeated `GRAPH_DATA` section, **re-sealed and re-signed so that its tree, seal and chain are all consistent**: the duplicate is the only fault, and the expected outcome is INVALID. `unknown-field` is the artifact above with one undefined field (number 99) appended to the `Artifact` message: nothing the tree covers changes, every check passes, and the expected outcome is **NOT VERIFIED**. `altered-section` flips one byte of the `GRAPH_DATA` payload: INVALID, by the integrity tree. A mutation is given as an operation on the first file (`append_hex`, `flip_byte_offset`).
 
 Two checkers are included. Neither is part of the format.
 
-* [`test-vectors/check_vectors.py`](test-vectors/check_vectors.py) recomputes everything above that is a hash, a message or a key derivation, from the file bytes and the rules in this document, using only the Python standard library. It also classifies each case by structure (a repeated section type or a root mismatch is INVALID; an undefined field with a matching root is NOT VERIFIED) and compares that with `expected_outcome`. It exits non-zero on any difference.
+* [`test-vectors/check_vectors.py`](test-vectors/check_vectors.py) recomputes everything above that is a hash, a message or a key derivation, from the file bytes and the rules in this document, using only the Python standard library. It also classifies each case by structure (a repeated section type or a root mismatch is INVALID; an undefined field with a matching root is NOT VERIFIED) and compares that with `expected_outcome`, and classifies each `resolutions` entry's record by its `schema` field (section 8) against `expected_schema_outcome`. It exits non-zero on any difference.
 * [`test-vectors/check_crypto`](test-vectors/check_crypto) (Go 1.26 or later, standard library only) verifies the Ed25519 and ML-DSA-65 halves of the seal and entry signatures with the empty ML-DSA context, confirms that a changed message fails, unwraps the content key from the vector's shared secret and decrypts every section to the plaintext shown. Run it with `go run . ../record-format-v2.json` in that directory.
 
 The values were first produced by one implementation (the signatures and the key encapsulation by its post-quantum library); both checkers were written from this document, in other languages and with other libraries, and agree. Not checked by them, and to be tested by a verifier against the vector with its own library: the X-Wing decapsulation that produces the shared secret (the recipient's seed, public key and ciphertext are given, and the X-Wing draft has its own vectors), the signature on the `duplicate-section` file's seal (it is a valid seal over its own tree, made with the same key), and parsing the protobuf `Artifact` from `file_base64` with a real Protocol Buffers library (the Python checker reads it with a hand-written reader).
@@ -461,6 +506,8 @@ The values were first produced by one implementation (the signatures and the key
 ## 13. Versioning and what this document does not cover
 
 **Versioning.** `format_version` names the layout of the whole file and of the integrity tree: a change to any hash input in sections 6 and 7 is a new `format_version`, and the layouts for a shipped version never change. The decision record's `schema` is versioned separately and may gain optional fields without a new schema. A future format version may replace the `lgt.io/truc/...` domain-separation constants with neutral ones; a verifier selects the constants by `format_version`, so files already written are unaffected.
+
+**2026-11-23.** Added the resolution record, `truc.resolution/v1` (section 8.1): a second decision-record schema, for a human decision on an escalation and for the markers and outcomes around it. Added the rule that an entry's decision record naming a schema a verifier does not recognise is NOT VERIFIED rather than INVALID (section 8), and narrowed the last-decision rule of section 9 to the last *decision* record, skipping any resolution. `format_version` stays 2: no hash input in sections 6 or 7 changed, and a resolution entry is an ordinary `AuditChainEntry`. A verifier built to the text before this date reads an unrecognised schema as invalid under the rule then in force, and so reports a resolution entry INVALID, not NOT VERIFIED.
 
 **Not covered here:**
 
