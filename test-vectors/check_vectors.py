@@ -95,6 +95,24 @@ for e in V["chain"]["entries"]:
     prev = h
 eq("audit_chain_head in header (entry 2)", head, x(V["chain"]["entries"][1]["entry_hash_hex"]))
 
+# ---- resolutions (section 8.1): a second standalone chain, plus an unrecognised-schema entry ----
+KNOWN_SCHEMAS = {"truc.decision/v1", "truc.decision/v2", "truc.resolution/v1"}
+eq("resolutions genesis head", genesis, x(V["resolutions"]["genesis_head_hex"]))
+prev = genesis
+for e in V["resolutions"]["entries"]:
+    dec = x(e["decision_hex"])
+    body = u64(e["sequence_number"]) + lp(x(e["prev_head_hash_hex"])) + u32(e["integrity_mode"]) + u64(e["recorded_at_unix_nanos"]) + bytes([e["decision_kind"]]) + lp(dec)
+    eq("resolution entry %d prev link" % e["sequence_number"], x(e["prev_head_hash_hex"]), prev)
+    h = H(body)
+    eq("resolution entry %d hash" % e["sequence_number"], h, x(e["entry_hash_hex"]))
+    eq("resolution entry %d signed message" % e["sequence_number"],
+       b"lgt.io/truc/v1/audit-chain/entry-signature" + lp(A["artifact_id"].encode()) + h,
+       x(e["signed_message_hex"]))
+    schema = json.loads(e["decision_text"])["schema"]
+    outcome = "RECOGNIZED" if schema in KNOWN_SCHEMAS else "NOT VERIFIED"
+    eq("resolution entry %d schema outcome (%s)" % (e["sequence_number"], schema), outcome, e["expected_schema_outcome"])
+    prev = h
+
 # ---- keys ----
 sk = V["signing_key"]
 eq("signing key fingerprint", H(x(sk["ed25519_public_hex"]) + x(sk["ml_dsa_65_public_hex"])), x(sk["fingerprint_hex"]))
